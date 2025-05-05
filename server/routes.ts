@@ -82,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminId: req.user.id,
         action: "Created Share",
         serviceName: entry.serviceName,
-        recipientEmail: recipientEmail ? recipientEmail.split('@')[0] : null, // Используем имя пользователя без домена
+        recipientEmail: entry.username, // Используем имя пользователя из записи пароля
         status: "Active",
         expiresAt: expiresAt
       });
@@ -121,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         adminId: req.user.id,
         action: "Revoked Share",
         serviceName: entry.serviceName,
-        recipientEmail: share.recipientEmail ? share.recipientEmail.split('@')[0] : null, // Используем имя пользователя без домена
+        recipientEmail: entry.username, // Используем имя пользователя из записи пароля
         status: "Revoked"
       });
       
@@ -176,7 +176,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           adminId: share.adminId,
           action: "Password Viewed",
           serviceName: originalEntry.serviceName,
-          recipientEmail: share.recipientEmail ? share.recipientEmail.split('@')[0] : null, // Используем имя пользователя без домена
+          recipientEmail: originalEntry.username, // Используем имя пользователя из записи пароля
           status: "Viewed",
           viewedAt,
           expiresAt
