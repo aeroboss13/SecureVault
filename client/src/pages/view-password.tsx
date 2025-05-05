@@ -41,8 +41,8 @@ export default function ViewPassword() {
   useEffect(() => {
     if (error) {
       toast({
-        title: "Error",
-        description: "This link has expired or is invalid.",
+        title: "Ошибка",
+        description: "Срок действия ссылки истек, либо ссылка недействительна.",
         variant: "destructive",
       });
     }
@@ -190,14 +190,14 @@ export default function ViewPassword() {
 
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-1">
-                        Username
+                        Имя пользователя
                       </label>
                       <CopyField value={service.username} type="text" />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-1">
-                        Password
+                        Пароль
                       </label>
                       <CopyField value={service.password} type="password" />
                     </div>
@@ -211,7 +211,7 @@ export default function ViewPassword() {
                           className="inline-flex items-center justify-center text-primary-600 hover:text-primary-800 text-sm font-medium"
                         >
                           <ExternalLink className="h-4 w-4 mr-1.5" />
-                          Go to {service.serviceName}
+                          Перейти на {service.serviceName}
                         </a>
                       </div>
                     )}
@@ -226,7 +226,7 @@ export default function ViewPassword() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-yellow-700">
-                      This link will expire when the timer runs out. Please copy these credentials immediately to a secure location.
+                      Срок действия ссылки истечет, когда закончится таймер. Пожалуйста, скопируйте данные доступа в надежное место.
                     </p>
                   </div>
                 </div>
@@ -234,7 +234,7 @@ export default function ViewPassword() {
 
               <div className="bg-neutral-50 p-4 flex flex-col items-center justify-center rounded-md">
                 <p className="text-xs text-neutral-500 mb-2 text-center">
-                  To confirm you've saved these credentials, click the button below:
+                  Чтобы подтвердить, что вы сохранили данные доступа, нажмите кнопку ниже:
                 </p>
                 <Button 
                   onClick={handleConfirmSave}
@@ -244,12 +244,12 @@ export default function ViewPassword() {
                   {savedConfirmed ? (
                     <>
                       <CheckCircle className="h-5 w-5 mr-1.5" />
-                      Credentials Saved
+                      Данные сохранены
                     </>
                   ) : (
                     <>
                       <CheckCircle className="h-5 w-5 mr-1.5" />
-                      I've Saved These Credentials
+                      Я сохранил эти данные
                     </>
                   )}
                 </Button>
@@ -259,7 +259,7 @@ export default function ViewPassword() {
         </Card>
         
         <div className="text-center mt-4 text-sm text-neutral-500">
-          <p>Powered by SecureVault</p>
+          <p>Разработано компанией ЗащитаПлюс</p>
         </div>
       </div>
     </div>
