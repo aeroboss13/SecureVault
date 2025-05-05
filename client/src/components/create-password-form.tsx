@@ -64,71 +64,44 @@ export default function CreatePasswordForm() {
     name: "services"
   });
 
-  // Create password entries mutation
-  const createPasswordMutation = useMutation({
+  // Create password entries and share in one batch request
+  const createPasswordBatchMutation = useMutation({
     mutationFn: async (data: CreatePasswordForm) => {
-      // Create promises for all password entries
-      const promises = data.services.map(service => 
-        apiRequest("POST", "/api/passwords", service)
-          .then(res => res.json())
-      );
-      
-      return Promise.all(promises);
-    },
-    onSuccess: (passwordEntries) => {
-      // Create share for the first entry (we'll display this one)
-      return createShareMutation.mutate({
-        entryId: passwordEntries[0].id,
-        serviceName: passwordEntries[0].serviceName,
-        username: passwordEntries[0].username
+      // Используем новый batch endpoint для создания всех паролей и ссылки одновременно
+      const res = await apiRequest("POST", "/api/passwords/batch", {
+        services: data.services,
+        recipientEmail: "user@example.com" // Требуется API, но не будет использоваться для отправки email
       });
-    },
-    onError: (error) => {
-      toast({
-        title: "Ошибка",
-        description: `Не удалось создать пароль: ${error.message}`,
-        variant: "destructive",
-      });
-    },
-  });
-  
-  // Create share mutation
-  const createShareMutation = useMutation({
-    mutationFn: async ({ 
-      entryId, 
-      serviceName,
-      username
-    }: { 
-      entryId: number, 
-      serviceName: string,
-      username: string
-    }) => {
-      // Creating share without recipient email
-      const res = await apiRequest("POST", "/api/shares", { 
-        entryId, 
-        recipientEmail: "user@example.com" // Required by API but won't be used
-      });
-      return {
-        share: await res.json(),
-        serviceName,
-        username
-      };
+      return res.json();
     },
     onSuccess: (result) => {
-      // Generate share URL
-      const url = `${window.location.origin}/view/${result.share.shareToken}`;
+      // Результат содержит entries (записи паролей) и share (ссылку)
+      if (result.share && result.entries && result.entries.length > 0) {
+        // Генерируем URL для ссылки
+        const url = `${window.location.origin}/view/${result.share.shareToken}`;
+        const firstEntry = result.entries[0];
+        
+        // Устанавливаем состояние для диалога
+        setShareUrl(url);
+        setShareInfo({
+          serviceName: firstEntry.serviceName,
+          username: firstEntry.username
+        });
+        
+        // Открываем диалог со ссылкой
+        setShareDialogOpen(true);
+        
+        // Копируем в буфер обмена
+        navigator.clipboard.writeText(url).catch(console.error);
+      } else {
+        toast({
+          title: "Предупреждение",
+          description: "Пароли созданы, но не удалось создать ссылку для общего доступа",
+          variant: "destructive",
+        });
+      }
       
-      // Set state for dialog
-      setShareUrl(url);
-      setShareInfo({
-        serviceName: result.serviceName,
-        username: result.username
-      });
-      
-      // Open the dialog
-      setShareDialogOpen(true);
-      
-      // Reset form
+      // Сбрасываем форму
       form.reset({
         services: [
           {
@@ -140,10 +113,7 @@ export default function CreatePasswordForm() {
         ]
       });
       
-      // Copy to clipboard
-      navigator.clipboard.writeText(url).catch(console.error);
-      
-      // Invalidate queries to refresh data
+      // Инвалидируем запросы для обновления данных
       queryClient.invalidateQueries({ queryKey: ["/api/passwords"] });
       queryClient.invalidateQueries({ queryKey: ["/api/shares"] });
       queryClient.invalidateQueries({ queryKey: ["/api/logs"] });
@@ -152,7 +122,7 @@ export default function CreatePasswordForm() {
     onError: (error) => {
       toast({
         title: "Ошибка",
-        description: `Не удалось создать ссылку: ${error.message}`,
+        description: `Не удалось создать пароли: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -161,7 +131,8 @@ export default function CreatePasswordForm() {
   const onSubmit = (data: CreatePasswordForm) => {
     if (!user) return;
     
-    createPasswordMutation.mutate(data);
+    // Используем новый batch метод
+    createPasswordBatchMutation.mutate(data);
   };
   
   // Handle password generation for a specific service
@@ -345,7 +316,7 @@ export default function CreatePasswordForm() {
             
             <Button
               type="submit"
-              disabled={createPasswordMutation.isPending || createShareMutation.isPending}
+              disabled={createPasswordBatchMutation.isPending}
             >
               Создать и поделиться
             </Button>
