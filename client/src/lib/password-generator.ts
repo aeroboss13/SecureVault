@@ -43,7 +43,7 @@ export function checkPasswordStrength(password: string): {
   color: string;
 } {
   if (!password) {
-    return { score: 0, label: 'No password', color: 'bg-neutral-200' };
+    return { score: 0, label: 'Пароль не указан', color: 'bg-neutral-200' };
   }
   
   let score = 0;
@@ -64,12 +64,12 @@ export function checkPasswordStrength(password: string): {
   
   // Define strength labels and colors
   const strengthLabels = [
-    'Very weak',
-    'Weak',
-    'Fair',
-    'Good',
-    'Strong',
-    'Very strong'
+    'Очень слабый',
+    'Слабый',
+    'Средний',
+    'Хороший',
+    'Сильный',
+    'Очень сильный'
   ];
   
   const strengthColors = [

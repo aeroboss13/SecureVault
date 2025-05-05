@@ -41,7 +41,7 @@ export default function PasswordGeneratorForm({ onGenerate }: PasswordGeneratorF
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium text-neutral-700">Password Length: {options.length}</Label>
+        <Label className="text-sm font-medium text-neutral-700">Длина пароля: {options.length}</Label>
       </div>
       <Slider
         value={[options.length]}
@@ -97,7 +97,7 @@ export default function PasswordGeneratorForm({ onGenerate }: PasswordGeneratorF
         onClick={handleGenerate}
       >
         <Wand2 className="h-4 w-4 mr-2" />
-        Generate Password
+        Сгенерировать пароль
       </Button>
     </div>
   );

@@ -152,7 +152,7 @@ export default function ViewPassword() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-heading font-bold text-white flex items-center">
                 <Shield className="h-5 w-5 mr-2" />
-                Secure Password Transfer
+                Безопасная передача пароля
               </h2>
               <CountdownTimer expiresAt={new Date(data.expires)} />
             </div>
@@ -163,10 +163,10 @@ export default function ViewPassword() {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary-100 mb-4">
                 <Shield className="h-8 w-8 text-primary-700" />
               </div>
-              <h3 className="text-lg font-heading font-medium text-neutral-900">Secure Credentials</h3>
+              <h3 className="text-lg font-heading font-medium text-neutral-900">Данные доступа</h3>
               <p className="mt-1 text-sm text-neutral-500">
-                These are your secure credentials for multiple services.
-                This page will self-destruct when the timer expires.
+                Это ваши данные доступа для нескольких сервисов.
+                Эта страница будет самоуничтожена по истечении времени.
               </p>
             </div>
 
@@ -182,7 +182,7 @@ export default function ViewPassword() {
                     {service.serviceUrl && (
                       <div>
                         <label className="block text-sm font-medium text-neutral-700 mb-1">
-                          Service URL
+                          URL сервиса
                         </label>
                         <CopyField value={service.serviceUrl} type="text" />
                       </div>
