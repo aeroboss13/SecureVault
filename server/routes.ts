@@ -102,12 +102,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const mainEntry = createdEntries[0];
         
         share = await storage.createPasswordShare({
-          entryId: mainEntry.id,
+          entryId: mainEntry.id, // Используем первую запись как основную для ссылки
           adminId: req.user.id,
           recipientEmail,
           shareToken,
           expiresAt
         });
+        
+        // Создаем связи между ссылкой и всеми записями паролей
+        for (const entry of createdEntries) {
+          await storage.createShareEntry({
+            shareId: share.id,
+            entryId: entry.id
+          });
+        }
         
         // Log the creation of a share
         await storage.createActivityLog({
@@ -151,6 +159,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recipientEmail,
         shareToken,
         expiresAt
+      });
+      
+      // Создаем связь между ссылкой и паролем
+      await storage.createShareEntry({
+        shareId: share.id,
+        entryId
       });
       
       // Log activity with expiry time
@@ -224,11 +238,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "This link has expired or been revoked" });
       }
       
-      // Get only the specific entry associated with this share
-      const entry = await storage.getPasswordEntry(share.entryId);
-      if (!entry) {
-        return res.status(404).json({ error: "Password entry not found" });
+      // Получаем все записи паролей, связанные с этой ссылкой
+      const entries = await storage.getEntriesByShareToken(token);
+      if (!entries || entries.length === 0) {
+        return res.status(404).json({ error: "Password entries not found" });
       }
+      
+      // Получаем основную запись (для отметки о просмотре и логирования)
+      const mainEntry = entries[0];
       
       // If not viewed yet, mark as viewed
       if (!share.viewed) {
@@ -245,22 +262,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createActivityLog({
           adminId: share.adminId,
           action: "Password Viewed",
-          serviceName: entry.serviceName,
-          recipientEmail: entry.username, // Используем имя пользователя из записи пароля
+          serviceName: mainEntry.serviceName,
+          recipientEmail: mainEntry.username, 
           status: "Viewed",
           viewedAt,
           expiresAt
         });
       }
       
-      // Return password data only for the specific entry
-      const services = [{
+      // Преобразуем все полученные записи в формат для отправки клиенту
+      const services = entries.map(entry => ({
         id: entry.id,
         serviceName: entry.serviceName,
         serviceUrl: entry.serviceUrl,
         username: entry.username,
         password: entry.password
-      }];
+      }));
       
       res.json({
         services,

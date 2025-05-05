@@ -83,14 +83,14 @@ export default function AuthPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex justify-center mb-6">
           <div className="bg-primary-700 rounded-full shadow-lg p-2">
-            <img src={logoSrc} alt="ЗащитаПлюс" className="h-14 w-14 object-contain" />
+            <img src={logoSrc} alt="FreshPass" className="h-14 w-14 object-contain" />
           </div>
         </div>
         <h1 className="text-3xl font-bold text-center font-heading text-neutral-900 mb-2">
-          ЗащитаПлюс
+          Freshpass
         </h1>
         <p className="text-center text-neutral-600 max-w-md mb-8">
-          Система безопасного хранения и передачи паролей для вашей организации
+          Система безопасного хранения и передачи паролей 
         </p>
         
         <div className="w-full max-w-md">
@@ -279,7 +279,7 @@ export default function AuthPage() {
       <footer className="bg-white py-6 border-t border-neutral-200">
         <div className="max-w-7xl mx-auto px-4 overflow-hidden sm:px-6 lg:px-8">
           <p className="text-center text-sm text-neutral-500">
-            &copy; {new Date().getFullYear()} ЗащитаПлюс. Все права защищены.
+            &copy; {new Date().getFullYear()} linux_torvalds. Все права защищены.
           </p>
         </div>
       </footer>
