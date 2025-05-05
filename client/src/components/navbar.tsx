@@ -43,7 +43,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <img src={logoSrc} alt="FRESH" className="h-8 mr-2" />
-              <span className="font-heading font-bold text-xl">Безопасный Доступ</span>
+              <span className="font-heading font-bold text-xl">ЗащитаПлюс</span>
             </div>
             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               {navigation.map((item) => (
