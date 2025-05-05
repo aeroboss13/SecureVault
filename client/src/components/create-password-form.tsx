@@ -201,10 +201,10 @@ export default function CreatePasswordForm() {
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Password Share Link Created</DialogTitle>
+            <DialogTitle>Ссылка для доступа создана</DialogTitle>
             <DialogDescription>
-              Use this link to share the password for {shareInfo.serviceName} ({shareInfo.username}).
-              The link will expire in 1 hour.
+              Используйте эту ссылку, чтобы поделиться доступом к {shareInfo.serviceName} ({shareInfo.username}).
+              Срок действия ссылки - 1 час.
             </DialogDescription>
           </DialogHeader>
           <div className="flex items-center space-x-2 mt-4">
@@ -217,12 +217,12 @@ export default function CreatePasswordForm() {
             </div>
             <Button type="button" size="sm" onClick={copyShareUrl}>
               <Copy className="h-4 w-4 mr-1" />
-              Copy
+              Копировать
             </Button>
           </div>
           <DialogFooter className="mt-6">
             <Button type="button" onClick={() => setShareDialogOpen(false)}>
-              Done
+              Готово
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -250,7 +250,7 @@ export default function CreatePasswordForm() {
                   name={`services.${index}.serviceName`}
                   render={({ field }) => (
                     <FormItem className="sm:col-span-3">
-                      <FormLabel>Service Name</FormLabel>
+                      <FormLabel>Название сервиса</FormLabel>
                       <FormControl>
                         <Input placeholder="AWS, GitHub, Dropbox, etc." {...field} />
                       </FormControl>
@@ -264,7 +264,7 @@ export default function CreatePasswordForm() {
                   name={`services.${index}.serviceUrl`}
                   render={({ field }) => (
                     <FormItem className="sm:col-span-3">
-                      <FormLabel>Service URL</FormLabel>
+                      <FormLabel>URL сервиса</FormLabel>
                       <FormControl>
                         <Input placeholder="https://example.com" {...field} />
                       </FormControl>
@@ -278,7 +278,7 @@ export default function CreatePasswordForm() {
                   name={`services.${index}.username`}
                   render={({ field }) => (
                     <FormItem className="sm:col-span-3">
-                      <FormLabel>Username/Email</FormLabel>
+                      <FormLabel>Имя пользователя</FormLabel>
                       <FormControl>
                         <Input placeholder="username@example.com" {...field} />
                       </FormControl>
