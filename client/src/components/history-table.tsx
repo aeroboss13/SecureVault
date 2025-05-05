@@ -149,7 +149,7 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
               Сервис
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Пользователь
+              Имя пользователя
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
               Дата
