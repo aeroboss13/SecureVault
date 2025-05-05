@@ -86,10 +86,10 @@ export default function AuthPage() {
           </div>
         </div>
         <h1 className="text-3xl font-bold text-center font-heading text-neutral-900 mb-2">
-          SecureVault
+          ЗащитаПлюс
         </h1>
         <p className="text-center text-neutral-600 max-w-md mb-8">
-          Secure password storage and sharing system for your organization
+          Система безопасного хранения и передачи паролей для вашей организации
         </p>
         
         <div className="w-full max-w-md">
@@ -100,16 +100,16 @@ export default function AuthPage() {
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+              <TabsTrigger value="login">Вход</TabsTrigger>
+              <TabsTrigger value="register">Регистрация</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               <Card>
                 <CardHeader>
-                  <CardTitle>Login</CardTitle>
+                  <CardTitle>Вход в систему</CardTitle>
                   <CardDescription>
-                    Enter your credentials to access your account
+                    Введите свои учётные данные для доступа к аккаунту
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -149,10 +149,10 @@ export default function AuthPage() {
                         {loginMutation.isPending ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Logging in...
+                            Выполняется вход...
                           </>
                         ) : (
-                          "Login"
+                          "Войти"
                         )}
                       </Button>
                     </form>
