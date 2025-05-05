@@ -183,14 +183,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Return password data for all entries
-      const services = allEntries.map(entry => ({
-        id: entry.id,
-        serviceName: entry.serviceName,
-        serviceUrl: entry.serviceUrl,
-        username: entry.username,
-        password: entry.password
-      }));
+      // Return password data ONLY for the entry associated with this share
+      const services = [{
+        id: originalEntry.id,
+        serviceName: originalEntry.serviceName,
+        serviceUrl: originalEntry.serviceUrl,
+        username: originalEntry.username,
+        password: originalEntry.password
+      }];
       
       res.json({
         services,
