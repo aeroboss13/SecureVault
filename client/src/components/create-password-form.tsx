@@ -85,8 +85,8 @@ export default function CreatePasswordForm() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create password: ${error.message}`,
+        title: "Ошибка",
+        description: `Не удалось создать пароль: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -151,8 +151,8 @@ export default function CreatePasswordForm() {
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: `Failed to create share: ${error.message}`,
+        title: "Ошибка",
+        description: `Не удалось создать ссылку: ${error.message}`,
         variant: "destructive",
       });
     },
@@ -191,8 +191,8 @@ export default function CreatePasswordForm() {
   const copyShareUrl = () => {
     navigator.clipboard.writeText(shareUrl).catch(console.error);
     toast({
-      title: "Link copied",
-      description: "Share link copied to clipboard",
+      title: "Ссылка скопирована",
+      description: "Ссылка скопирована в буфер обмена",
     });
   };
 
@@ -292,7 +292,7 @@ export default function CreatePasswordForm() {
                   name={`services.${index}.password`}
                   render={({ field }) => (
                     <FormItem className="sm:col-span-3">
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Пароль</FormLabel>
                       <div className="relative">
                         <FormControl>
                           <Input
@@ -322,7 +322,7 @@ export default function CreatePasswordForm() {
               <div className="mt-4">
                 <div>
                   <FormLabel className="block text-sm font-medium text-neutral-700">
-                    Password Generator
+                    Генератор паролей
                   </FormLabel>
                   <div className="mt-1">
                     <PasswordGeneratorForm onGenerate={(password) => handlePasswordGeneration(password, index)} />
@@ -340,14 +340,14 @@ export default function CreatePasswordForm() {
               className="flex items-center"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Service
+              Добавить сервис
             </Button>
             
             <Button
               type="submit"
               disabled={createPasswordMutation.isPending || createShareMutation.isPending}
             >
-              Create and Share
+              Создать и поделиться
             </Button>
           </div>
         </form>
