@@ -95,8 +95,8 @@ export default function ViewPassword() {
   const handleConfirmSave = () => {
     setSavedConfirmed(true);
     toast({
-      title: "Confirmed",
-      description: "You've confirmed saving these credentials.",
+      title: "Подтверждено",
+      description: "Вы подтвердили сохранение данных доступа.",
     });
   };
   
@@ -105,8 +105,8 @@ export default function ViewPassword() {
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="text-center">
           <Loader2 className="h-12 w-12 mx-auto text-primary-600 animate-spin mb-4" />
-          <h2 className="text-xl font-medium text-neutral-800">Loading secure credentials...</h2>
-          <p className="mt-2 text-sm text-neutral-600">This may take a moment</p>
+          <h2 className="text-xl font-medium text-neutral-800">Загрузка данных доступа...</h2>
+          <p className="mt-2 text-sm text-neutral-600">Это может занять некоторое время</p>
         </div>
       </div>
     );
@@ -119,12 +119,12 @@ export default function ViewPassword() {
           <CardHeader className="bg-red-500 text-white rounded-t-lg">
             <div className="flex items-center space-x-2">
               <AlertTriangle className="h-6 w-6" />
-              <h2 className="text-xl font-bold">Link Expired or Invalid</h2>
+              <h2 className="text-xl font-bold">Ссылка истекла или недействительна</h2>
             </div>
           </CardHeader>
           <CardContent className="pt-6 pb-8">
             <p className="mb-6 text-neutral-700">
-              This secure link has expired or is invalid. Please contact the administrator who shared this password to generate a new link.
+              Срок действия ссылки истек или ссылка недействительна. Пожалуйста, свяжитесь с администратором, который поделился с вами паролем, чтобы получить новую ссылку.
             </p>
             <div className="flex justify-center">
               <Button 
@@ -132,10 +132,10 @@ export default function ViewPassword() {
                 onClick={() => window.close()}
                 className="mr-4"
               >
-                Close Window
+                Закрыть окно
               </Button>
               <Button onClick={() => navigate("/auth")}>
-                Go to Login
+                Перейти на страницу входа
               </Button>
             </div>
           </CardContent>
