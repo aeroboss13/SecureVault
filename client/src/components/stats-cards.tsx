@@ -16,29 +16,34 @@ interface StatsCardsProps {
   stats: Stats;
 }
 
-export default function StatsCards({ stats }: StatsCardsProps) {
+export default function StatsCards({ stats = { 
+  activeShares: 0, 
+  sharedToday: 0, 
+  expiringShares: 0, 
+  viewedShares: 0 
+} }: StatsCardsProps) {
   const cards = [
     {
       title: "Active Passwords",
-      value: stats.activeShares,
+      value: stats?.activeShares || 0,
       icon: <Lock className="h-6 w-6 text-primary-700" />,
       bgColor: "bg-primary-100",
     },
     {
       title: "Shared Today",
-      value: stats.sharedToday,
+      value: stats?.sharedToday || 0,
       icon: <Calendar className="h-6 w-6 text-secondary-700" />,
       bgColor: "bg-secondary-100",
     },
     {
       title: "Expiring Soon",
-      value: stats.expiringShares,
+      value: stats?.expiringShares || 0,
       icon: <Clock className="h-6 w-6 text-red-600" />,
       bgColor: "bg-red-100",
     },
     {
       title: "Viewed",
-      value: stats.viewedShares,
+      value: stats?.viewedShares || 0,
       icon: <Eye className="h-6 w-6 text-green-600" />,
       bgColor: "bg-green-100",
     },

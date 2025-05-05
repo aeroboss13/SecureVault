@@ -48,15 +48,15 @@ export default function Navbar() {
             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               {navigation.map((item) => (
                 <Link key={item.name} href={item.href}>
-                  <a className={cn(
-                    "px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out flex items-center",
+                  <div className={cn(
+                    "px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out flex items-center cursor-pointer",
                     location === item.href 
                       ? "bg-primary-800" 
                       : "hover:bg-primary-600"
                   )}>
                     <item.icon className="h-4 w-4 mr-1.5" />
                     {item.name}
-                  </a>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -108,15 +108,15 @@ export default function Navbar() {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             {navigation.map((item) => (
               <Link key={item.name} href={item.href}>
-                <a className={cn(
-                  "block px-3 py-2 rounded-md text-base font-medium flex items-center",
+                <div className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium flex items-center cursor-pointer",
                   location === item.href 
                     ? "bg-primary-900 text-white" 
                     : "text-white hover:bg-primary-700"
                 )}>
                   <item.icon className="h-5 w-5 mr-2" />
                   {item.name}
-                </a>
+                </div>
               </Link>
             ))}
             <button

@@ -15,23 +15,42 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [showHistoryAll, setShowHistoryAll] = useState(false);
   
+  // Define default empty objects for type safety
+  const defaultStats = {
+    activeShares: 0,
+    sharedToday: 0,
+    expiringShares: 0,
+    viewedShares: 0
+  };
+  
+  const defaultShares: { share: any; entry: any }[] = [];
+  const defaultLogs: any[] = [];
+  
   // Fetch stats data
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: statsData, isLoading: statsLoading } = useQuery<typeof defaultStats>({
     queryKey: ["/api/stats"],
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false
   });
   
   // Fetch active shares data
-  const { data: shares, isLoading: sharesLoading } = useQuery({
+  const { data: sharesData, isLoading: sharesLoading } = useQuery<typeof defaultShares>({
     queryKey: ["/api/shares"],
     staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: false
   });
   
   // Fetch activity logs
-  const { data: logs, isLoading: logsLoading } = useQuery({
+  const { data: logsData, isLoading: logsLoading } = useQuery<typeof defaultLogs>({
     queryKey: ["/api/logs"],
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false
   });
+  
+  // Use the data with defaults
+  const stats = statsData || defaultStats;
+  const shares = sharesData || defaultShares;
+  const logs = logsData || defaultLogs;
   
   return (
     <div className="min-h-screen flex flex-col">

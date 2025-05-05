@@ -8,11 +8,18 @@ import HistoryTable from "@/components/history-table";
 export default function History() {
   const { user } = useAuth();
   
+  // Default empty array for type safety
+  const defaultLogs: any[] = [];
+  
   // Fetch activity logs
-  const { data: logs, isLoading: logsLoading } = useQuery({
+  const { data: logsData, isLoading: logsLoading } = useQuery<typeof defaultLogs>({
     queryKey: ["/api/logs"],
     staleTime: 1000 * 60 * 2, // 2 minutes
+    retry: false
   });
+  
+  // Use the data with default
+  const logs = logsData || defaultLogs;
   
   return (
     <div className="min-h-screen flex flex-col">
