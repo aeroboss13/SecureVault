@@ -50,6 +50,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: error.message });
     }
   });
+  
+  // Create multiple password entries and optionally share them
+  app.post("/api/passwords/batch", adminRequired, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
+      const { services, recipientEmail } = req.body;
+      
+      if (!Array.isArray(services) || services.length === 0) {
+        return res.status(400).json({ error: "At least one service is required" });
+      }
+      
+      const createdEntries = [];
+      
+      // Create entry for each service
+      for (const service of services) {
+        const entryData = insertPasswordEntrySchema.parse({
+          adminId: req.user.id,
+          serviceName: service.serviceName,
+          serviceUrl: service.serviceUrl || null,
+          username: service.username,
+          password: service.password
+        });
+        
+        const entry = await storage.createPasswordEntry(entryData);
+        createdEntries.push(entry);
+        
+        // Log creation of each password
+        await storage.createActivityLog({
+          adminId: req.user.id,
+          action: "Created Password",
+          serviceName: entry.serviceName,
+          status: "Success"
+        });
+      }
+      
+      // If recipient email is provided, create a share link for the first entry
+      let share = null;
+      if (recipientEmail && createdEntries.length > 0) {
+        // Generate unique token
+        const shareToken = nanoid(24);
+        
+        // Set expiration (1 hour from now)
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 1);
+        
+        // Use the first entry as the main entry for the share
+        const mainEntry = createdEntries[0];
+        
+        share = await storage.createPasswordShare({
+          entryId: mainEntry.id,
+          adminId: req.user.id,
+          recipientEmail,
+          shareToken,
+          expiresAt
+        });
+        
+        // Log the creation of a share
+        await storage.createActivityLog({
+          adminId: req.user.id,
+          action: "Created Share",
+          serviceName: mainEntry.serviceName,
+          recipientEmail: mainEntry.username,
+          status: "Active",
+          expiresAt
+        });
+      }
+      
+      res.status(201).json({ entries: createdEntries, share });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      res.status(400).json({ error: errorMessage });
+    }
+  });
 
   // Password shares
   app.post("/api/shares", adminRequired, async (req, res) => {
@@ -70,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       expiresAt.setHours(expiresAt.getHours() + 1);
       
       const share = await storage.createPasswordShare({
-        entryId,
+        entryId, // Используем entryId как основной (первый) пароль для ссылки
         adminId: req.user.id,
         recipientEmail,
         shareToken,
@@ -148,16 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "This link has expired or been revoked" });
       }
       
-      // Get all password entries for this admin
-      const allEntries = await storage.getPasswordEntriesByAdmin(share.adminId);
-      if (!allEntries || allEntries.length === 0) {
-        return res.status(404).json({ error: "Password entries not found" });
-      }
-      
-      // Make sure the original entry is included
-      const originalEntry = allEntries.find(entry => entry.id === share.entryId);
-      if (!originalEntry) {
-        return res.status(404).json({ error: "Original password entry not found" });
+      // Get only the specific entry associated with this share
+      const entry = await storage.getPasswordEntry(share.entryId);
+      if (!entry) {
+        return res.status(404).json({ error: "Password entry not found" });
       }
       
       // If not viewed yet, mark as viewed
@@ -175,32 +245,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createActivityLog({
           adminId: share.adminId,
           action: "Password Viewed",
-          serviceName: originalEntry.serviceName,
-          recipientEmail: originalEntry.username, // Используем имя пользователя из записи пароля
+          serviceName: entry.serviceName,
+          recipientEmail: entry.username, // Используем имя пользователя из записи пароля
           status: "Viewed",
           viewedAt,
           expiresAt
         });
       }
       
-      // Return password data for entries associated with this share
-      const entries = await storage.getEntriesByShareToken(token);
-      const services = entries.length > 0 ? entries.map(entry => ({
+      // Return password data only for the specific entry
+      const services = [{
         id: entry.id,
         serviceName: entry.serviceName,
         serviceUrl: entry.serviceUrl,
         username: entry.username,
         password: entry.password
-      })) : [
-        // Fallback to original entry if no entries are found (legacy support)
-        {
-          id: originalEntry.id,
-          serviceName: originalEntry.serviceName,
-          serviceUrl: originalEntry.serviceUrl,
-          username: originalEntry.username,
-          password: originalEntry.password
-        }
-      ];
+      }];
       
       res.json({
         services,

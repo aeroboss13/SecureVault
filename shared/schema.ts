@@ -21,6 +21,7 @@ export const passwordEntries = pgTable("password_entries", {
 
 export const passwordShares = pgTable("password_shares", {
   id: serial("id").primaryKey(),
+  entryId: integer("entry_id").notNull(), // ID of the password entry shared
   adminId: integer("admin_id").notNull(),
   recipientEmail: text("recipient_email"),
   shareToken: text("share_token").notNull().unique(),
@@ -65,6 +66,7 @@ export const insertPasswordEntrySchema = createInsertSchema(passwordEntries).pic
 });
 
 export const insertPasswordShareSchema = createInsertSchema(passwordShares).pick({
+  entryId: true,
   adminId: true,
   recipientEmail: true,
   shareToken: true,
