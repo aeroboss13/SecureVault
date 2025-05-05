@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -40,6 +40,8 @@ export function setupAuth(app: Express) {
     cookie: {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      secure: false, // Set to false for development
+      sameSite: 'lax'
     }
   };
 
@@ -117,7 +119,7 @@ export function setupAuth(app: Express) {
   });
 
   // Admin middleware
-  const adminRequired = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const adminRequired = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Unauthorized" });
     }
