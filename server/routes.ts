@@ -142,10 +142,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "This link has expired or been revoked" });
       }
       
-      // Get the password entry
-      const entry = await storage.getPasswordEntry(share.entryId);
-      if (!entry) {
-        return res.status(404).json({ error: "Password entry not found" });
+      // Get all password entries for this admin
+      const allEntries = await storage.getPasswordEntriesByAdmin(share.adminId);
+      if (!allEntries || allEntries.length === 0) {
+        return res.status(404).json({ error: "Password entries not found" });
+      }
+      
+      // Make sure the original entry is included
+      const originalEntry = allEntries.find(entry => entry.id === share.entryId);
+      if (!originalEntry) {
+        return res.status(404).json({ error: "Original password entry not found" });
       }
       
       // If not viewed yet, mark as viewed
@@ -156,18 +162,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createActivityLog({
           adminId: share.adminId,
           action: "Password Viewed",
-          serviceName: entry.serviceName,
+          serviceName: originalEntry.serviceName,
           recipientEmail: share.recipientEmail,
           status: "Viewed"
         });
       }
       
-      // Return password data
-      res.json({
+      // Return password data for all entries
+      const services = allEntries.map(entry => ({
+        id: entry.id,
         serviceName: entry.serviceName,
         serviceUrl: entry.serviceUrl,
         username: entry.username,
-        password: entry.password,
+        password: entry.password
+      }));
+      
+      res.json({
+        services,
         expires: share.expiresAt,
         viewed: true,
       });

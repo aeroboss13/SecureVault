@@ -9,11 +9,16 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import CopyField from "@/components/copy-field";
 import CountdownTimer from "@/components/countdown-timer";
 
-interface SharedPassword {
+interface ServiceCredential {
+  id: number;
   serviceName: string;
-  serviceUrl: string;
+  serviceUrl: string | null;
   username: string;
   password: string;
+}
+
+interface SharedPassword {
+  services: ServiceCredential[];
   expires: string;
   viewed: boolean;
 }
@@ -114,36 +119,61 @@ export default function ViewPassword() {
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary-100 mb-4">
                 <Shield className="h-8 w-8 text-primary-700" />
               </div>
-              <h3 className="text-lg font-heading font-medium text-neutral-900">{data.serviceName} Credentials</h3>
+              <h3 className="text-lg font-heading font-medium text-neutral-900">Secure Credentials</h3>
               <p className="mt-1 text-sm text-neutral-500">
-                These credentials will give you access to {data.serviceName}.
+                These are your secure credentials for multiple services.
                 This page will self-destruct when the timer expires.
               </p>
             </div>
 
-            <div className="space-y-6">
-              {data.serviceUrl && (
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-1">
-                    Service URL
-                  </label>
-                  <CopyField value={data.serviceUrl} type="text" />
+            <div className="space-y-8">
+              {data.services.map((service, index) => (
+                <div key={service.id} className="border rounded-lg p-4">
+                  <h4 className="text-lg font-medium text-neutral-900 mb-4 flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-primary-600" />
+                    {service.serviceName}
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    {service.serviceUrl && (
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-700 mb-1">
+                          Service URL
+                        </label>
+                        <CopyField value={service.serviceUrl} type="text" />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                        Username
+                      </label>
+                      <CopyField value={service.username} type="text" />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1">
+                        Password
+                      </label>
+                      <CopyField value={service.password} type="password" />
+                    </div>
+                    
+                    {service.serviceUrl && (
+                      <div className="text-right mt-2">
+                        <a 
+                          href={service.serviceUrl.startsWith('http') ? service.serviceUrl : `https://${service.serviceUrl}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center text-primary-600 hover:text-primary-800 text-sm font-medium"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-1.5" />
+                          Go to {service.serviceName}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Username
-                </label>
-                <CopyField value={data.username} type="text" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Password
-                </label>
-                <CopyField value={data.password} type="password" />
-              </div>
+              ))}
 
               <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                 <div className="flex">
@@ -180,20 +210,6 @@ export default function ViewPassword() {
                   )}
                 </Button>
               </div>
-              
-              {data.serviceUrl && (
-                <div className="text-center mt-6">
-                  <a 
-                    href={data.serviceUrl.startsWith('http') ? data.serviceUrl : `https://${data.serviceUrl}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center text-primary-600 hover:text-primary-800 text-sm font-medium"
-                  >
-                    <ExternalLink className="h-4 w-4 mr-1.5" />
-                    Go to {data.serviceName}
-                  </a>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>

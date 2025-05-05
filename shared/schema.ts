@@ -94,7 +94,7 @@ export const loginSchema = z.object({
 
 export const serviceSchema = z.object({
   serviceName: z.string().min(1, "Service name is required"),
-  serviceUrl: z.string().url().optional().or(z.literal('')),
+  serviceUrl: z.string().optional(),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
