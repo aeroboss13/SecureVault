@@ -22,14 +22,17 @@ import {
   History
 } from "lucide-react";
 
+// Импорт логотипа
+import logoSrc from "@/assets/logo.png";
+
 export default function Navbar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const navigation = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "History", href: "/history", icon: History },
+    { name: "Главная", href: "/", icon: LayoutDashboard },
+    { name: "История", href: "/history", icon: History },
   ];
   
   const handleLogout = () => {
@@ -42,8 +45,8 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <Shield className="h-8 w-8 mr-2" />
-              <span className="font-heading font-bold text-xl">SecureVault</span>
+              <img src={logoSrc} alt="FRESH" className="h-8 mr-2" />
+              <span className="font-heading font-bold text-xl">Безопасный Доступ</span>
             </div>
             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               {navigation.map((item) => (
@@ -79,7 +82,7 @@ export default function Navbar() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="h-4 w-4 mr-2" />
-                    <span>Logout</span>
+                    <span>Выйти</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -124,7 +127,7 @@ export default function Navbar() {
               className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-primary-700 flex items-center"
             >
               <LogOut className="h-5 w-5 mr-2" />
-              Logout
+              Выйти
             </button>
           </div>
         </div>
