@@ -33,6 +33,24 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
     );
   }
   
+  // Перевод действий на русский язык
+  const translateAction = (action: string): string => {
+    switch (action) {
+      case "Created Password":
+        return "Создан пароль";
+      case "Created Share":
+        return "Создана ссылка";
+      case "Password Viewed":
+        return "Пароль просмотрен";
+      case "Revoked Share":
+        return "Доступ отозван";
+      case "Link Expired":
+        return "Срок действия истек";
+      default:
+        return action;
+    }
+  };
+
   // Function to get icon and style based on action
   const getActionInfo = (action: string) => {
     switch (action) {
@@ -75,6 +93,28 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
     }
   };
   
+  // Перевод статусов на русский язык
+  const translateStatus = (status: string | null): string => {
+    if (!status) return "";
+    
+    switch (status.toLowerCase()) {
+      case "active":
+        return "Активен";
+      case "success":
+        return "Успешно";
+      case "viewed":
+        return "Просмотрен";
+      case "complete":
+        return "Завершен";
+      case "expired":
+        return "Истек";
+      case "revoked":
+        return "Отозван";
+      default:
+        return status;
+    }
+  };
+
   // Function to get status badge style
   const getStatusStyle = (status: string | null) => {
     if (!status) return "bg-neutral-100 text-neutral-800";
@@ -103,25 +143,25 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
         <thead className="bg-neutral-50">
           <tr>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Action
+              Действие
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Service
+              Сервис
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Recipient
+              Пользователь
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Date
+              Дата
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Viewed At
+              Просмотрен
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Expires In
+              Истекает через
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-              Status
+              Статус
             </th>
           </tr>
         </thead>
@@ -139,7 +179,7 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
                     </div>
                     <div className="ml-3">
                       <div className="text-sm font-medium text-neutral-900">
-                        {log.action}
+                        {translateAction(log.action)}
                       </div>
                     </div>
                   </div>
@@ -171,7 +211,7 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
                       "px-2.5 py-0.5 inline-flex text-xs leading-5 font-medium rounded-full",
                       getStatusStyle(log.status)
                     )}>
-                      {log.status}
+                      {translateStatus(log.status)}
                     </span>
                   )}
                 </td>
