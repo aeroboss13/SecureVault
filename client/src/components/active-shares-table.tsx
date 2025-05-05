@@ -41,9 +41,11 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
   const { toast } = useToast();
   
   // Filter active shares and sort by most recent first
-  const activeShares = shares
-    ?.filter(s => s.share.active && new Date(s.share.expiresAt) > new Date())
-    .sort((a, b) => new Date(b.share.createdAt).getTime() - new Date(a.share.createdAt).getTime()) || [];
+  const activeShares = shares && shares.length > 0
+    ? shares
+        .filter(s => s && s.share && s.share.active && new Date(s.share.expiresAt) > new Date())
+        .sort((a, b) => new Date(b.share.createdAt).getTime() - new Date(a.share.createdAt).getTime())
+    : [];
   
   // Mutation to revoke a share
   const revokeShareMutation = useMutation({
