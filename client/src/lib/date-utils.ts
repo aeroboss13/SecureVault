@@ -96,3 +96,26 @@ export function getTimeAgo(date: Date): string {
   
   return formatDate(date);
 }
+
+export function getTimeRemaining(expiresAt: Date | string | null): string {
+  if (!expiresAt) return "Not applicable";
+  
+  const now = new Date();
+  const expires = new Date(expiresAt);
+  
+  if (expires <= now) {
+    return "Expired";
+  }
+  
+  const diffMs = expires.getTime() - now.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  
+  if (diffMinutes < 60) {
+    return `${diffMinutes} min${diffMinutes !== 1 ? 's' : ''}`;
+  }
+  
+  const hours = Math.floor(diffMinutes / 60);
+  const minutes = diffMinutes % 60;
+  
+  return `${hours}h ${minutes}m`;
+}

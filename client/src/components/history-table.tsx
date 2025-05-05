@@ -1,4 +1,4 @@
-import { formatDateTime } from "@/lib/date-utils";
+import { formatDateTime, getTimeRemaining } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { 
   Calendar, 
@@ -16,6 +16,8 @@ interface ActivityLog {
   recipientEmail: string | null;
   createdAt: string;
   status: string | null;
+  viewedAt: string | null;
+  expiresAt: string | null;
 }
 
 interface HistoryTableProps {
@@ -113,6 +115,12 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
               Date
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Viewed At
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Expires In
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
               Status
             </th>
           </tr>
@@ -120,6 +128,7 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
         <tbody className="bg-white divide-y divide-neutral-200">
           {logs.map((log) => {
             const { icon, bgColor, textColor } = getActionInfo(log.action);
+            const showExpiry = log.action === "Password Viewed" || log.action === "Created Share";
             
             return (
               <tr key={log.id}>
@@ -143,6 +152,18 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
                   {formatDateTime(new Date(log.createdAt))}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                  {log.viewedAt ? formatDateTime(new Date(log.viewedAt)) : "-"}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
+                  {showExpiry ? 
+                    <span className={log.expiresAt && new Date(log.expiresAt) > new Date() ? 
+                      "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                      {getTimeRemaining(log.expiresAt)}
+                    </span> : 
+                    "-"
+                  }
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {log.status && (

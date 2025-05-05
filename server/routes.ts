@@ -72,13 +72,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expiresAt
       });
       
-      // Log activity
+      // Log activity with expiry time
       await storage.createActivityLog({
         adminId: req.user.id,
         action: "Created Share",
         serviceName: entry.serviceName,
         recipientEmail: recipientEmail,
-        status: "Active"
+        status: "Active",
+        expiresAt: expiresAt
       });
       
       res.status(201).json(share);
@@ -156,15 +157,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If not viewed yet, mark as viewed
       if (!share.viewed) {
+        // Get current time as viewed time
+        const viewedAt = new Date();
+        
+        // Calculate expiry time (60 minutes from now)
+        const expiresAt = new Date(viewedAt);
+        expiresAt.setMinutes(expiresAt.getMinutes() + 60);
+        
         await storage.markShareAsViewed(share.id);
         
-        // Log activity
+        // Log activity with viewed and expiry times
         await storage.createActivityLog({
           adminId: share.adminId,
           action: "Password Viewed",
           serviceName: originalEntry.serviceName,
           recipientEmail: share.recipientEmail,
-          status: "Viewed"
+          status: "Viewed",
+          viewedAt,
+          expiresAt
         });
       }
       

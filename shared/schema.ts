@@ -40,6 +40,8 @@ export const activityLogs = pgTable("activity_logs", {
   recipientEmail: text("recipient_email"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   status: text("status"),
+  viewedAt: timestamp("viewed_at"),
+  expiresAt: timestamp("expires_at"),
 });
 
 // Zod schemas
@@ -71,6 +73,8 @@ export const insertActivityLogSchema = createInsertSchema(activityLogs).pick({
   serviceName: true,
   recipientEmail: true,
   status: true,
+  viewedAt: true,
+  expiresAt: true,
 });
 
 // Generated types
