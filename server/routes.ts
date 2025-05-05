@@ -16,6 +16,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Password entries
   app.post("/api/passwords", adminRequired, async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      
       const validatedData = insertPasswordEntrySchema.parse({
         ...req.body,
         adminId: req.user.id
@@ -33,7 +37,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(entry);
     } catch (error) {
-      res.status(400).json({ error: error.message });
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      res.status(400).json({ error: errorMessage });
     }
   });
   

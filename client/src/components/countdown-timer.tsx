@@ -10,6 +10,7 @@ interface CountdownTimerProps {
 export default function CountdownTimer({ expiresAt }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(formatExpiryTime(expiresAt));
   const [percentage, setPercentage] = useState(getExpiryPercentage(expiresAt));
+  const [isExpired, setIsExpired] = useState(new Date() >= expiresAt);
   
   useEffect(() => {
     // Update timer every second
@@ -19,6 +20,7 @@ export default function CountdownTimer({ expiresAt }: CountdownTimerProps) {
       if (now >= expiresAt) {
         setTimeLeft("Expired");
         setPercentage(0);
+        setIsExpired(true);
         clearInterval(timer);
         return;
       }
@@ -30,23 +32,53 @@ export default function CountdownTimer({ expiresAt }: CountdownTimerProps) {
     return () => clearInterval(timer);
   }, [expiresAt]);
   
-  const isExpiringSoon = percentage < 50;
+  const isExpiringSoon = percentage < 30;
+  const isWarning = percentage < 50 && percentage >= 30;
   
   return (
     <div>
-      <div className="flex items-center">
-        <Clock className="h-5 w-5 text-white mr-1" />
-        <span className="text-sm text-white font-medium">Expires in: {timeLeft}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <Clock className={cn(
+            "h-5 w-5 mr-1",
+            isExpired ? "text-red-400" : isExpiringSoon ? "text-red-300" : isWarning ? "text-yellow-300" : "text-white"
+          )} />
+          <span className={cn(
+            "text-sm font-medium",
+            isExpired ? "text-red-400" : isExpiringSoon ? "text-red-300" : isWarning ? "text-yellow-300" : "text-white"
+          )}>
+            {isExpired ? "Link has expired" : `Expires in: ${timeLeft}`}
+          </span>
+        </div>
+        
+        {!isExpired && (
+          <div className="text-xs text-white bg-black bg-opacity-40 rounded-full px-2 py-0.5">
+            {Math.floor(percentage)}%
+          </div>
+        )}
       </div>
-      <div className="w-full h-1 mt-3 bg-white bg-opacity-20 rounded-full overflow-hidden">
+      
+      <div className="w-full h-2 mt-2 bg-white bg-opacity-20 rounded-full overflow-hidden">
         <div
           className={cn(
-            "timer-progress h-full bg-white",
-            isExpiringSoon && "bg-red-300" 
+            "timer-progress h-full transition-all duration-1000 ease-linear",
+            isExpired ? "bg-red-500" : isExpiringSoon ? "bg-red-400" : isWarning ? "bg-yellow-400" : "bg-green-400"
           )}
-          style={{ width: `${percentage}%` }}
+          style={{ width: isExpired ? "100%" : `${percentage}%` }}
         ></div>
       </div>
+      
+      {isExpired && (
+        <p className="text-xs text-red-300 mt-1">
+          This link is no longer accessible.
+        </p>
+      )}
+      
+      {isExpiringSoon && !isExpired && (
+        <p className="text-xs text-red-300 mt-1">
+          Hurry! This link will expire soon.
+        </p>
+      )}
     </div>
   );
 }

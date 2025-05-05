@@ -28,6 +28,7 @@ export default function ViewPassword() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [savedConfirmed, setSavedConfirmed] = useState(false);
+  const [expiryTimerActive, setExpiryTimerActive] = useState(true);
   
   // Fetch shared password data
   const { data, isLoading, error } = useQuery<SharedPassword>({
@@ -46,6 +47,49 @@ export default function ViewPassword() {
       });
     }
   }, [error, toast]);
+  
+  // Handle link expiration
+  useEffect(() => {
+    if (!data || !expiryTimerActive) return;
+    
+    const expiryTime = new Date(data.expires);
+    const now = new Date();
+    
+    // If already expired, show message and redirect
+    if (now >= expiryTime) {
+      setExpiryTimerActive(false);
+      toast({
+        title: "Link Expired",
+        description: "This secure link has expired.",
+        variant: "destructive",
+      });
+      
+      // Redirect after short delay to show toast
+      const redirectTimer = setTimeout(() => {
+        navigate("/auth");
+      }, 3000);
+      
+      return () => clearTimeout(redirectTimer);
+    }
+    
+    // Set timer to check for expiration
+    const timeUntilExpiry = expiryTime.getTime() - now.getTime();
+    const expiryTimer = setTimeout(() => {
+      setExpiryTimerActive(false);
+      toast({
+        title: "Link Expired",
+        description: "This secure link has expired.",
+        variant: "destructive",
+      });
+      
+      // Redirect after short delay
+      setTimeout(() => {
+        navigate("/auth");
+      }, 3000);
+    }, timeUntilExpiry);
+    
+    return () => clearTimeout(expiryTimer);
+  }, [data, expiryTimerActive, toast, navigate]);
   
   // Handle confirmed save
   const handleConfirmSave = () => {

@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { formatDateTime, formatExpiryTime, getExpiryPercentage } from "@/lib/date-utils";
+import { formatDateTime, formatExpiryTime, getExpiryPercentage, getTimeRemaining } from "@/lib/date-utils";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 import { Copy, Trash2, ExternalLink, AtSign, Globe } from "lucide-react";
@@ -113,6 +113,9 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
               Created
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Viewed
+            </th>
+            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
               Expires In
             </th>
             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
@@ -128,6 +131,8 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
             const expiryTimeText = formatExpiryTime(new Date(share.expiresAt));
             const expiryPercentage = getExpiryPercentage(new Date(share.expiresAt));
             const isExpiringWithinHour = expiryPercentage <= 50;
+            const timeRemaining = getTimeRemaining(share.expiresAt);
+            const expiresInClass = isExpiringWithinHour ? "text-red-600 font-medium" : "text-green-600 font-medium";
             
             return (
               <tr key={share.id}>
@@ -157,6 +162,16 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                   <div className="text-sm text-neutral-500">{formatDateTime(new Date(share.createdAt))}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-neutral-500">
+                    {share.viewedAt ? formatDateTime(new Date(share.viewedAt)) : "Not viewed yet"}
+                  </div>
+                  {share.viewedAt && (
+                    <div className="text-xs text-green-600 mt-1">
+                      Active for 60 min after view
+                    </div>
+                  )}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <svg className={cn(
                       "h-5 w-5 mr-1.5",
@@ -164,9 +179,11 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                     )} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm text-neutral-900">{expiryTimeText}</span>
+                    <span className={cn("text-sm", expiresInClass)}>
+                      {timeRemaining}
+                    </span>
                   </div>
-                  <div className="w-24 h-1.5 mt-1 bg-neutral-200 rounded-full overflow-hidden">
+                  <div className="w-full h-1.5 mt-1 bg-neutral-200 rounded-full overflow-hidden">
                     <div className={cn(
                       "timer-progress h-full",
                       isExpiringWithinHour ? "bg-red-500" : "bg-green-500"
