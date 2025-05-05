@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import logoSrc from "@/assets/logo.png";
 
 import { Button } from "@/components/ui/button";
 import { 
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { 
-  Shield, 
   User, 
   LogOut, 
   Menu, 
@@ -21,9 +21,6 @@ import {
   LayoutDashboard, 
   History
 } from "lucide-react";
-
-// Импорт логотипа
-import logoSrc from "@/assets/logo.png";
 
 export default function Navbar() {
   const [location] = useLocation();
