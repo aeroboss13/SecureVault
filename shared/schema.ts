@@ -23,7 +23,7 @@ export const passwordShares = pgTable("password_shares", {
   id: serial("id").primaryKey(),
   entryId: integer("entry_id").notNull(),
   adminId: integer("admin_id").notNull(),
-  recipientEmail: text("recipient_email").notNull(),
+  recipientEmail: text("recipient_email"),
   shareToken: text("share_token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -92,12 +92,16 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const createPasswordSchema = z.object({
+export const serviceSchema = z.object({
   serviceName: z.string().min(1, "Service name is required"),
   serviceUrl: z.string().url().optional().or(z.literal('')),
   username: z.string().min(1, "Username is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  recipientEmail: z.string().email("Invalid email address"),
+});
+
+export const createPasswordSchema = z.object({
+  services: z.array(serviceSchema),
+  recipientEmail: z.string().email("Invalid email address").optional(),
 });
 
 export const passwordGeneratorSchema = z.object({
@@ -109,5 +113,6 @@ export const passwordGeneratorSchema = z.object({
 });
 
 export type LoginForm = z.infer<typeof loginSchema>;
+export type ServiceData = z.infer<typeof serviceSchema>;
 export type CreatePasswordForm = z.infer<typeof createPasswordSchema>;
 export type PasswordGeneratorOptions = z.infer<typeof passwordGeneratorSchema>;

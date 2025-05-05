@@ -1,12 +1,17 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Eye, EyeOff, Copy, Share2 } from "lucide-react";
-import { createPasswordSchema, type CreatePasswordForm } from "@shared/schema";
+import { Eye, EyeOff, Copy, Share2, Plus, Trash } from "lucide-react";
+import { 
+  createPasswordSchema, 
+  serviceSchema,
+  type CreatePasswordForm, 
+  type ServiceData 
+} from "@shared/schema";
 
 import { 
   Form, 
@@ -32,37 +37,50 @@ import {
 export default function CreatePasswordForm() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState<{[key: number]: boolean}>({});
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
   const [shareInfo, setShareInfo] = useState({
     serviceName: "",
-    username: "",
-    recipientEmail: ""
+    username: ""
   });
   
   const form = useForm<CreatePasswordForm>({
     resolver: zodResolver(createPasswordSchema),
     defaultValues: {
-      serviceName: "",
-      serviceUrl: "",
-      username: "",
-      password: "",
-      recipientEmail: "",
+      services: [
+        {
+          serviceName: "",
+          serviceUrl: "",
+          username: "",
+          password: ""
+        }
+      ]
     },
   });
   
-  // Create password entry mutation
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "services"
+  });
+
+  // Create password entries mutation
   const createPasswordMutation = useMutation({
     mutationFn: async (data: CreatePasswordForm) => {
-      const res = await apiRequest("POST", "/api/passwords", data);
-      return await res.json();
+      // Create promises for all password entries
+      const promises = data.services.map(service => 
+        apiRequest("POST", "/api/passwords", service)
+          .then(res => res.json())
+      );
+      
+      return Promise.all(promises);
     },
-    onSuccess: (passwordEntry) => {
-      // Now create a share
+    onSuccess: (passwordEntries) => {
+      // Create share for the first entry (we'll display this one)
       return createShareMutation.mutate({
-        entryId: passwordEntry.id,
-        recipientEmail: form.getValues().recipientEmail,
+        entryId: passwordEntries[0].id,
+        serviceName: passwordEntries[0].serviceName,
+        username: passwordEntries[0].username
       });
     },
     onError: (error) => {
@@ -76,27 +94,51 @@ export default function CreatePasswordForm() {
   
   // Create share mutation
   const createShareMutation = useMutation({
-    mutationFn: async ({ entryId, recipientEmail }: { entryId: number, recipientEmail: string }) => {
-      const res = await apiRequest("POST", "/api/shares", { entryId, recipientEmail });
-      return await res.json();
+    mutationFn: async ({ 
+      entryId, 
+      serviceName,
+      username
+    }: { 
+      entryId: number, 
+      serviceName: string,
+      username: string
+    }) => {
+      // Creating share without recipient email
+      const res = await apiRequest("POST", "/api/shares", { 
+        entryId, 
+        recipientEmail: "user@example.com" // Required by API but won't be used
+      });
+      return {
+        share: await res.json(),
+        serviceName,
+        username
+      };
     },
-    onSuccess: (share, variables) => {
+    onSuccess: (result) => {
       // Generate share URL
-      const url = `${window.location.origin}/view/${share.shareToken}`;
+      const url = `${window.location.origin}/view/${result.share.shareToken}`;
       
       // Set state for dialog
       setShareUrl(url);
       setShareInfo({
-        serviceName: form.getValues().serviceName,
-        username: form.getValues().username,
-        recipientEmail: variables.recipientEmail
+        serviceName: result.serviceName,
+        username: result.username
       });
       
       // Open the dialog
       setShareDialogOpen(true);
       
       // Reset form
-      form.reset();
+      form.reset({
+        services: [
+          {
+            serviceName: "",
+            serviceUrl: "",
+            username: "",
+            password: ""
+          }
+        ]
+      });
       
       // Copy to clipboard
       navigator.clipboard.writeText(url).catch(console.error);
@@ -119,20 +161,30 @@ export default function CreatePasswordForm() {
   const onSubmit = (data: CreatePasswordForm) => {
     if (!user) return;
     
-    createPasswordMutation.mutate({
-      ...data,
-      serviceUrl: data.serviceUrl || "", // Handle empty URL
-    });
+    createPasswordMutation.mutate(data);
   };
   
-  // Handle password generation
-  const handlePasswordGeneration = (generatedPassword: string) => {
-    form.setValue("password", generatedPassword);
+  // Handle password generation for a specific service
+  const handlePasswordGeneration = (generatedPassword: string, index: number) => {
+    form.setValue(`services.${index}.password`, generatedPassword);
   };
   
   // Handle toggle password visibility
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const togglePasswordVisibility = (index: number) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+  
+  // Add a new service
+  const addService = () => {
+    append({
+      serviceName: "",
+      serviceUrl: "",
+      username: "",
+      password: ""
+    });
   };
   
   // Function to handle copying of the share URL
@@ -151,7 +203,7 @@ export default function CreatePasswordForm() {
           <DialogHeader>
             <DialogTitle>Password Share Link Created</DialogTitle>
             <DialogDescription>
-              Use this link to share the password for {shareInfo.serviceName} with {shareInfo.recipientEmail}.
+              Use this link to share the password for {shareInfo.serviceName} ({shareInfo.username}).
               The link will expire in 1 hour.
             </DialogDescription>
           </DialogHeader>
@@ -178,115 +230,119 @@ export default function CreatePasswordForm() {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-            <FormField
-              control={form.control}
-              name="serviceName"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-3">
-                  <FormLabel>Service Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="AWS, GitHub, Dropbox, etc." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+          {fields.map((field, index) => (
+            <div key={field.id} className="p-4 border rounded-lg mb-6 relative">
+              {index > 0 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-2 h-8 w-8 p-0 text-destructive"
+                  onClick={() => remove(index)}
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="serviceUrl"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-3">
-                  <FormLabel>Service URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-3">
-                  <FormLabel>Username/Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="username@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="recipientEmail"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-3">
-                  <FormLabel>Recipient Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="recipient@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-4">
-                  <FormLabel>Password</FormLabel>
-                  <div className="mt-1 flex rounded-md shadow-sm">
-                    <div className="relative flex-grow">
+              
+              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <FormField
+                  control={form.control}
+                  name={`services.${index}.serviceName`}
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-3">
+                      <FormLabel>Service Name</FormLabel>
                       <FormControl>
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          className="rounded-r-none"
-                          {...field}
-                        />
+                        <Input placeholder="AWS, GitHub, Dropbox, etc." {...field} />
                       </FormControl>
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
-                        onClick={togglePasswordVisibility}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5 text-neutral-500" />
-                        ) : (
-                          <Eye className="h-5 w-5 text-neutral-500" />
-                        )}
-                      </button>
-                    </div>
-                    <Button
-                      type="button"
-                      className="rounded-l-none"
-                      onClick={() => handlePasswordGeneration(form.getValues().password || "")}
-                    >
-                      Generate
-                    </Button>
-                  </div>
-                  <PasswordStrengthMeter password={field.value} className="mt-2" />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            <div className="sm:col-span-2">
-              <FormLabel className="block text-sm font-medium text-neutral-700">
-                Password Generator Options
-              </FormLabel>
-              <div className="mt-1">
-                <PasswordGeneratorForm onGenerate={handlePasswordGeneration} />
+                <FormField
+                  control={form.control}
+                  name={`services.${index}.serviceUrl`}
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-3">
+                      <FormLabel>Service URL</FormLabel>
+                      <FormControl>
+                        <Input placeholder="https://example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`services.${index}.username`}
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-3">
+                      <FormLabel>Username/Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="username@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name={`services.${index}.password`}
+                  render={({ field }) => (
+                    <FormItem className="sm:col-span-3">
+                      <FormLabel>Password</FormLabel>
+                      <div className="relative">
+                        <FormControl>
+                          <Input
+                            type={showPassword[index] ? "text" : "password"}
+                            {...field}
+                          />
+                        </FormControl>
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
+                          onClick={() => togglePasswordVisibility(index)}
+                        >
+                          {showPassword[index] ? (
+                            <EyeOff className="h-5 w-5 text-neutral-500" />
+                          ) : (
+                            <Eye className="h-5 w-5 text-neutral-500" />
+                          )}
+                        </button>
+                      </div>
+                      <PasswordStrengthMeter password={field.value} className="mt-2" />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="mt-4">
+                <div>
+                  <FormLabel className="block text-sm font-medium text-neutral-700">
+                    Password Generator
+                  </FormLabel>
+                  <div className="mt-1">
+                    <PasswordGeneratorForm onGenerate={(password) => handlePasswordGeneration(password, index)} />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="flex justify-end">
+          ))}
+          
+          <div className="flex justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addService}
+              className="flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Service
+            </Button>
+            
             <Button
               type="submit"
               disabled={createPasswordMutation.isPending || createShareMutation.isPending}
