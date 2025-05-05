@@ -59,8 +59,8 @@ export default function ViewPassword() {
     if (now >= expiryTime) {
       setExpiryTimerActive(false);
       toast({
-        title: "Link Expired",
-        description: "This secure link has expired.",
+        title: "Срок действия истек", 
+        description: "Срок действия защищенной ссылки истек.",
         variant: "destructive",
       });
       
@@ -77,8 +77,8 @@ export default function ViewPassword() {
     const expiryTimer = setTimeout(() => {
       setExpiryTimerActive(false);
       toast({
-        title: "Link Expired",
-        description: "This secure link has expired.",
+        title: "Срок действия истек",
+        description: "Срок действия защищенной ссылки истек.",
         variant: "destructive",
       });
       
