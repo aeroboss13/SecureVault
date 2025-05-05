@@ -21,7 +21,6 @@ export const passwordEntries = pgTable("password_entries", {
 
 export const passwordShares = pgTable("password_shares", {
   id: serial("id").primaryKey(),
-  entryId: integer("entry_id").notNull(),
   adminId: integer("admin_id").notNull(),
   recipientEmail: text("recipient_email"),
   shareToken: text("share_token").notNull().unique(),
@@ -30,6 +29,12 @@ export const passwordShares = pgTable("password_shares", {
   viewed: boolean("viewed").notNull().default(false),
   viewedAt: timestamp("viewed_at"),
   active: boolean("active").notNull().default(true),
+});
+
+export const shareEntries = pgTable("share_entries", {
+  id: serial("id").primaryKey(),
+  shareId: integer("share_id").notNull(),
+  entryId: integer("entry_id").notNull(),
 });
 
 export const activityLogs = pgTable("activity_logs", {
@@ -60,11 +65,15 @@ export const insertPasswordEntrySchema = createInsertSchema(passwordEntries).pic
 });
 
 export const insertPasswordShareSchema = createInsertSchema(passwordShares).pick({
-  entryId: true,
   adminId: true,
   recipientEmail: true,
   shareToken: true,
   expiresAt: true,
+});
+
+export const insertShareEntrySchema = createInsertSchema(shareEntries).pick({
+  shareId: true,
+  entryId: true,
 });
 
 export const insertActivityLogSchema = createInsertSchema(activityLogs).pick({
@@ -86,6 +95,9 @@ export type InsertPasswordEntry = z.infer<typeof insertPasswordEntrySchema>;
 
 export type PasswordShare = typeof passwordShares.$inferSelect;
 export type InsertPasswordShare = z.infer<typeof insertPasswordShareSchema>;
+
+export type ShareEntry = typeof shareEntries.$inferSelect;
+export type InsertShareEntry = z.infer<typeof insertShareEntrySchema>;
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;

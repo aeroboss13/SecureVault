@@ -183,14 +183,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Return password data for all entries associated with this admin
-      const services = allEntries.map(entry => ({
+      // Return password data for entries associated with this share
+      const entries = await storage.getEntriesByShareToken(token);
+      const services = entries.length > 0 ? entries.map(entry => ({
         id: entry.id,
         serviceName: entry.serviceName,
         serviceUrl: entry.serviceUrl,
         username: entry.username,
         password: entry.password
-      }));
+      })) : [
+        // Fallback to original entry if no entries are found (legacy support)
+        {
+          id: originalEntry.id,
+          serviceName: originalEntry.serviceName,
+          serviceUrl: originalEntry.serviceUrl,
+          username: originalEntry.username,
+          password: originalEntry.password
+        }
+      ];
       
       res.json({
         services,

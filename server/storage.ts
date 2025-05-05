@@ -25,9 +25,12 @@ export interface IStorage {
   
   // Password shares
   createPasswordShare(share: InsertPasswordShare): Promise<PasswordShare>;
+  createShareEntry(shareEntry: InsertShareEntry): Promise<ShareEntry>;
   getPasswordShare(id: number): Promise<PasswordShare | undefined>;
   getPasswordShareByToken(token: string): Promise<PasswordShare | undefined>;
   getPasswordSharesByAdmin(adminId: number): Promise<PasswordShare[]>;
+  getShareEntriesByShareId(shareId: number): Promise<ShareEntry[]>;
+  getEntriesByShareToken(token: string): Promise<PasswordEntry[]>;
   markShareAsViewed(id: number): Promise<void>;
   revokePasswordShare(id: number): Promise<void>;
   
@@ -51,6 +54,7 @@ export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private passwordEntries: Map<number, PasswordEntry>;
   private passwordShares: Map<number, PasswordShare>;
+  private shareEntries: Map<number, ShareEntry>;
   private activityLogs: Map<number, ActivityLog>;
   
   sessionStore: session.SessionStore;
@@ -58,17 +62,20 @@ export class MemStorage implements IStorage {
   private userIdCounter: number;
   private entryIdCounter: number;
   private shareIdCounter: number;
+  private shareEntryIdCounter: number;
   private logIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.passwordEntries = new Map();
     this.passwordShares = new Map();
+    this.shareEntries = new Map();
     this.activityLogs = new Map();
     
     this.userIdCounter = 1;
     this.entryIdCounter = 1;
     this.shareIdCounter = 1;
+    this.shareEntryIdCounter = 1;
     this.logIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
@@ -165,6 +172,36 @@ export class MemStorage implements IStorage {
       share.active = false;
       this.passwordShares.set(id, share);
     }
+  }
+  
+  async createShareEntry(insertShareEntry: InsertShareEntry): Promise<ShareEntry> {
+    const id = this.shareEntryIdCounter++;
+    const shareEntry: ShareEntry = { ...insertShareEntry, id };
+    this.shareEntries.set(id, shareEntry);
+    return shareEntry;
+  }
+  
+  async getShareEntriesByShareId(shareId: number): Promise<ShareEntry[]> {
+    return Array.from(this.shareEntries.values()).filter(
+      (entry) => entry.shareId === shareId
+    );
+  }
+  
+  async getEntriesByShareToken(token: string): Promise<PasswordEntry[]> {
+    const share = await this.getPasswordShareByToken(token);
+    if (!share) {
+      return [];
+    }
+    
+    const shareEntries = await this.getShareEntriesByShareId(share.id);
+    if (shareEntries.length === 0) {
+      return [];
+    }
+    
+    const entryIds = shareEntries.map(se => se.entryId);
+    return Array.from(this.passwordEntries.values()).filter(
+      (entry) => entryIds.includes(entry.id)
+    );
   }
   
   // Activity logs
