@@ -1,4 +1,4 @@
-# Freshpass (бывший ЗащитаПлюс)
+# Freshpass 
 
 Secure password storage system that allows administrators to store and securely share credentials with one-time links.
 
