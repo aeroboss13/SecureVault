@@ -6,8 +6,10 @@ import {
   PasswordShare,
   InsertPasswordShare,
   ActivityLog,
-  InsertActivityLog
-} from "@shared/schema";
+  InsertActivityLog,
+  ShareEntry,
+  InsertShareEntry
+} from "../shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
 

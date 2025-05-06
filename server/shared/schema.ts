@@ -1,61 +1,60 @@
-import { z } from "zod";
-import { pgTable, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
 
-// Define tables
 export const users = pgTable("users", {
-  id: integer("id").primaryKey().notNull(),
-  username: text("username").notNull(),
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  isAdmin: boolean("is_admin").notNull().default(false)
+  isAdmin: boolean("is_admin").notNull().default(false),
 });
 
 export const passwordEntries = pgTable("password_entries", {
-  id: integer("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
   adminId: integer("admin_id").notNull(),
   serviceName: text("service_name").notNull(),
   serviceUrl: text("service_url"),
   username: text("username").notNull(),
   password: text("password").notNull(),
-  createdAt: timestamp("created_at").notNull()
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const passwordShares = pgTable("password_shares", {
-  id: integer("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
+  entryId: integer("entry_id").notNull(), // ID of the password entry shared
   adminId: integer("admin_id").notNull(),
   recipientEmail: text("recipient_email"),
-  entryId: integer("entry_id").notNull(),
-  shareToken: text("share_token").notNull(),
+  shareToken: text("share_token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   viewed: boolean("viewed").notNull().default(false),
   viewedAt: timestamp("viewed_at"),
   active: boolean("active").notNull().default(true),
-  createdAt: timestamp("created_at").notNull()
 });
 
 export const shareEntries = pgTable("share_entries", {
-  id: integer("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
   shareId: integer("share_id").notNull(),
-  entryId: integer("entry_id").notNull()
+  entryId: integer("entry_id").notNull(),
 });
 
 export const activityLogs = pgTable("activity_logs", {
-  id: integer("id").primaryKey().notNull(),
+  id: serial("id").primaryKey(),
   adminId: integer("admin_id"),
   action: text("action").notNull(),
   serviceName: text("service_name"),
   recipientEmail: text("recipient_email"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
   status: text("status"),
   viewedAt: timestamp("viewed_at"),
   expiresAt: timestamp("expires_at"),
-  createdAt: timestamp("created_at").notNull()
 });
 
-// Define insert schemas
+// Zod schemas
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
-  isAdmin: true
+  isAdmin: true,
 });
 
 export const insertPasswordEntrySchema = createInsertSchema(passwordEntries).pick({
@@ -63,20 +62,20 @@ export const insertPasswordEntrySchema = createInsertSchema(passwordEntries).pic
   serviceName: true,
   serviceUrl: true,
   username: true,
-  password: true
+  password: true,
 });
 
 export const insertPasswordShareSchema = createInsertSchema(passwordShares).pick({
+  entryId: true,
   adminId: true,
   recipientEmail: true,
-  entryId: true,
   shareToken: true,
-  expiresAt: true
+  expiresAt: true,
 });
 
 export const insertShareEntrySchema = createInsertSchema(shareEntries).pick({
   shareId: true,
-  entryId: true
+  entryId: true,
 });
 
 export const insertActivityLogSchema = createInsertSchema(activityLogs).pick({
@@ -86,10 +85,10 @@ export const insertActivityLogSchema = createInsertSchema(activityLogs).pick({
   recipientEmail: true,
   status: true,
   viewedAt: true,
-  expiresAt: true
+  expiresAt: true,
 });
 
-// Export types
+// Generated types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
@@ -105,32 +104,32 @@ export type InsertShareEntry = z.infer<typeof insertShareEntrySchema>;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 
-// Additional schemas for form validation
+// Extended schemas for frontend validation
 export const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required")
+  password: z.string().min(1, "Password is required"),
 });
 
 export const serviceSchema = z.object({
   serviceName: z.string().min(1, "Service name is required"),
-  serviceUrl: z.string().optional().nullable(),
+  serviceUrl: z.string().optional(),
   username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required")
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export const createPasswordSchema = z.object({
-  services: z.array(serviceSchema).min(1, "At least one service is required")
+  services: z.array(serviceSchema),
+  recipientEmail: z.string().email("Invalid email address").optional(),
 });
 
 export const passwordGeneratorSchema = z.object({
-  length: z.number().min(8).max(100).default(16),
-  includeUppercase: z.boolean().default(true),
-  includeLowercase: z.boolean().default(true),
-  includeNumbers: z.boolean().default(true),
-  includeSymbols: z.boolean().default(true)
+  length: z.number().min(8).max(32),
+  uppercase: z.boolean(),
+  lowercase: z.boolean(),
+  numbers: z.boolean(),
+  symbols: z.boolean(),
 });
 
-// Export form types
 export type LoginForm = z.infer<typeof loginSchema>;
 export type ServiceData = z.infer<typeof serviceSchema>;
 export type CreatePasswordForm = z.infer<typeof createPasswordSchema>;
