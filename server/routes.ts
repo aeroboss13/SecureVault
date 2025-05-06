@@ -221,6 +221,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Endpoint to confirm and deactivate a shared link
+  app.post("/api/shared/:token/confirm", async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      // Get share by token
+      const share = await storage.getPasswordShareByToken(token);
+      if (!share) {
+        return res.status(404).json({ error: "Share not found" });
+      }
+      
+      // Check if already inactive
+      if (!share.active) {
+        return res.status(400).json({ error: "This link is already inactive" });
+      }
+      
+      // Deactivate the share
+      await storage.revokePasswordShare(share.id);
+      
+      // Get related password entry for logging
+      const entry = await storage.getPasswordEntry(share.entryId);
+      
+      // Log the confirmation
+      await storage.createActivityLog({
+        adminId: share.adminId,
+        action: "Confirmed Access",
+        serviceName: entry ? entry.serviceName : null,
+        recipientEmail: entry ? entry.username : null,
+        status: "Confirmed"
+      });
+      
+      res.status(200).json({ success: true, message: "Link has been deactivated" });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      res.status(500).json({ error: errorMessage });
+    }
+  });
+  
   // Public endpoint to access a shared password
   app.get("/api/shared/:token", async (req, res) => {
     try {
@@ -303,6 +341,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stats
   app.get("/api/stats", adminRequired, async (req, res) => {
     try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+      
       const activeShares = await storage.getActiveSharesCount(req.user.id);
       const sharedToday = await storage.getSharesCreatedTodayCount(req.user.id);
       const expiringShares = await storage.getExpiringSharesCount(req.user.id);
@@ -315,7 +357,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         viewedShares
       });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+      res.status(500).json({ error: errorMessage });
     }
   });
 

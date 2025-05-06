@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
-import { getQueryFn } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoSrc from "@/assets/logo.png";
 import { Shield, Loader2, Clock, ExternalLink, AlertTriangle, CheckCircle } from "lucide-react";
@@ -92,13 +92,44 @@ export default function ViewPassword() {
     return () => clearTimeout(expiryTimer);
   }, [data, expiryTimerActive, toast, navigate]);
   
+  // Мутация для подтверждения сохранения данных
+  const confirmMutation = useMutation({
+    mutationFn: async () => {
+      if (!token) return;
+      const res = await apiRequest("POST", `/api/shared/${token}/confirm`);
+      return res.json();
+    },
+    onSuccess: () => {
+      setSavedConfirmed(true);
+      toast({
+        title: "Подтверждено",
+        description: "Вы подтвердили сохранение данных. Ссылка деактивирована.",
+      });
+      
+      // Для дополнительной безопасности установим таймер, который
+      // автоматически закроет страницу или перенаправит пользователя
+      setTimeout(() => {
+        // Если это единственная вкладка - переход на страницу входа, 
+        // в противном случае - попытка закрыть окно
+        if (window.history.length > 1) {
+          navigate("/auth");
+        } else {
+          window.close();
+        }
+      }, 10000); // 10 секунд на прочтение сообщения
+    },
+    onError: () => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось подтвердить сохранение данных",
+        variant: "destructive",
+      });
+    }
+  });
+  
   // Handle confirmed save
   const handleConfirmSave = () => {
-    setSavedConfirmed(true);
-    toast({
-      title: "Подтверждено",
-      description: "Вы подтвердили сохранение данных доступа.",
-    });
+    confirmMutation.mutate();
   };
   
   if (isLoading) {
@@ -242,10 +273,15 @@ export default function ViewPassword() {
                 </p>
                 <Button 
                   onClick={handleConfirmSave}
-                  disabled={savedConfirmed}
+                  disabled={savedConfirmed || confirmMutation.isPending}
                   className="flex items-center"
                 >
-                  {savedConfirmed ? (
+                  {confirmMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-1.5 animate-spin" />
+                      Подтверждение...
+                    </>
+                  ) : savedConfirmed ? (
                     <>
                       <CheckCircle className="h-5 w-5 mr-1.5" />
                       Данные сохранены

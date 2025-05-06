@@ -5,19 +5,55 @@ const UPPERCASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const NUMBER_CHARS = '0123456789';
 const SYMBOL_CHARS = '!@#$%^&*()-_=+[]{};:,.<>?';
 
+/**
+ * Генерирует пароль специального формата для первого сервиса:
+ * 3 строчные буквы + 4 цифры + 3 прописные буквы + спецсимвол
+ */
+export function generateSpecialFormatPassword(): string {
+  // Выбираем случайные символы из каждой категории
+  let lowercase = '';
+  let numbers = '';
+  let uppercase = '';
+  
+  // 3 строчные буквы
+  for (let i = 0; i < 3; i++) {
+    const randomIndex = Math.floor(Math.random() * LOWERCASE_CHARS.length);
+    lowercase += LOWERCASE_CHARS[randomIndex];
+  }
+  
+  // 4 цифры
+  for (let i = 0; i < 4; i++) {
+    const randomIndex = Math.floor(Math.random() * NUMBER_CHARS.length);
+    numbers += NUMBER_CHARS[randomIndex];
+  }
+  
+  // 3 прописные буквы
+  for (let i = 0; i < 3; i++) {
+    const randomIndex = Math.floor(Math.random() * UPPERCASE_CHARS.length);
+    uppercase += UPPERCASE_CHARS[randomIndex];
+  }
+  
+  // 1 спецсимвол
+  const symbolIndex = Math.floor(Math.random() * SYMBOL_CHARS.length);
+  const symbol = SYMBOL_CHARS[symbolIndex];
+  
+  // Собираем пароль в нужном порядке: 3 строчные + 4 цифры + 3 прописные + спецсимвол
+  return lowercase + numbers + uppercase + symbol;
+}
+
 export function generatePassword(options: PasswordGeneratorOptions): string {
-  const { length, uppercase, lowercase, numbers, symbols } = options;
+  const { length, includeUppercase, includeLowercase, includeNumbers, includeSymbols } = options;
   
   // Ensure at least one option is selected
-  if (!uppercase && !lowercase && !numbers && !symbols) {
+  if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
     throw new Error('At least one character type must be selected');
   }
   
   let charset = '';
-  if (uppercase) charset += UPPERCASE_CHARS;
-  if (lowercase) charset += LOWERCASE_CHARS;
-  if (numbers) charset += NUMBER_CHARS;
-  if (symbols) charset += SYMBOL_CHARS;
+  if (includeUppercase) charset += UPPERCASE_CHARS;
+  if (includeLowercase) charset += LOWERCASE_CHARS;
+  if (includeNumbers) charset += NUMBER_CHARS;
+  if (includeSymbols) charset += SYMBOL_CHARS;
   
   // Generate initial password
   let password = '';
@@ -28,10 +64,10 @@ export function generatePassword(options: PasswordGeneratorOptions): string {
   
   // Ensure the password meets the selected requirements
   let meetsRequirements = true;
-  if (uppercase && !/[A-Z]/.test(password)) meetsRequirements = false;
-  if (lowercase && !/[a-z]/.test(password)) meetsRequirements = false;
-  if (numbers && !/[0-9]/.test(password)) meetsRequirements = false;
-  if (symbols && !/[!@#$%^&*\(\)-_=+\[\]{};:,.<>?]/.test(password)) meetsRequirements = false;
+  if (includeUppercase && !/[A-Z]/.test(password)) meetsRequirements = false;
+  if (includeLowercase && !/[a-z]/.test(password)) meetsRequirements = false;
+  if (includeNumbers && !/[0-9]/.test(password)) meetsRequirements = false;
+  if (includeSymbols && !/[!@#$%^&*\(\)-_=+\[\]{};:,.<>?]/.test(password)) meetsRequirements = false;
   
   // If the generated password doesn't meet requirements, generate again
   return meetsRequirements ? password : generatePassword(options);
