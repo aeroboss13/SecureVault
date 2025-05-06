@@ -37,13 +37,13 @@ export default function Navbar() {
   };
   
   return (
-    <nav className="bg-primary-700 text-white shadow-md">
+    <nav className="bg-primary-700 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <img src={logoSrc} alt="FRESH" className="h-8 mr-2" />
-              <span className="font-heading font-bold text-xl">ЗащитаПлюс</span>
+              <img src={logoSrc} alt="Freshpass" className="h-8 mr-2" />
+              <span className="font-heading font-bold text-xl text-black">Freshpass</span>
             </div>
             <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
               {navigation.map((item) => (
@@ -51,8 +51,8 @@ export default function Navbar() {
                   <div className={cn(
                     "px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out flex items-center cursor-pointer",
                     location === item.href 
-                      ? "bg-primary-800" 
-                      : "hover:bg-primary-600"
+                      ? "bg-primary-800 text-white" 
+                      : "text-black hover:bg-primary-600 hover:text-white"
                   )}>
                     <item.icon className="h-4 w-4 mr-1.5" />
                     {item.name}
@@ -66,7 +66,7 @@ export default function Navbar() {
             <div className="hidden md:block">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="text-white hover:bg-primary-600">
+                  <Button variant="ghost" className="text-black hover:bg-primary-600 hover:text-white">
                     <User className="h-5 w-5 mr-1" />
                     <span>{user?.username}</span>
                   </Button>
@@ -88,7 +88,7 @@ export default function Navbar() {
             <div className="-mr-2 flex md:hidden">
               <Button 
                 variant="ghost" 
-                className="text-white hover:bg-primary-600"
+                className="text-black hover:bg-primary-600 hover:text-white"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? (

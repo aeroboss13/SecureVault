@@ -55,7 +55,7 @@ export default function History() {
       <footer className="bg-white">
         <div className="max-w-7xl mx-auto py-6 px-4 overflow-hidden sm:px-6 lg:px-8">
           <p className="text-center text-sm text-neutral-400">
-            &copy; {new Date().getFullYear()} SecureVault. All rights reserved.
+            &copy; {new Date().getFullYear()} Freshpass. All rights reserved.
           </p>
         </div>
       </footer>

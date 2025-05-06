@@ -154,7 +154,7 @@ export default function ViewPassword() {
                 <AlertTriangle className="h-6 w-6" />
                 <h2 className="text-xl font-bold">Ссылка истекла или недействительна</h2>
               </div>
-              <img src={logoSrc} alt="ЗащитаПлюс" className="h-8 w-8 object-contain" />
+              <img src={logoSrc} alt="Freshpass" className="h-8 w-8 object-contain" />
             </div>
           </CardHeader>
           <CardContent className="pt-6 pb-8">
@@ -186,7 +186,7 @@ export default function ViewPassword() {
           <div className="bg-primary-700 px-6 py-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-heading font-bold text-white flex items-center">
-                <img src={logoSrc} alt="ЗащитаПлюс" className="h-6 w-6 mr-2" />
+                <img src={logoSrc} alt="Freshpass" className="h-6 w-6 mr-2" />
                 Безопасная передача пароля
               </h2>
               <CountdownTimer expiresAt={new Date(data.expires)} />
@@ -196,7 +196,7 @@ export default function ViewPassword() {
           <CardContent className="px-6 py-6">
             <div className="text-center mb-6">
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary-700 mb-4 p-2">
-                <img src={logoSrc} alt="ЗащитаПлюс" className="h-12 w-12 object-contain" />
+                <img src={logoSrc} alt="Freshpass" className="h-12 w-12 object-contain" />
               </div>
               <h3 className="text-lg font-heading font-medium text-neutral-900">Данные доступа</h3>
               <p className="mt-1 text-sm text-neutral-500">
@@ -299,7 +299,7 @@ export default function ViewPassword() {
         </Card>
         
         <div className="text-center mt-4 text-sm text-neutral-500">
-          <p>Разработано компанией ЗащитаПлюс</p>
+          <p>Разработано компанией Freshpass</p>
         </div>
       </div>
     </div>
