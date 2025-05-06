@@ -24,7 +24,7 @@ export default function PasswordGeneratorForm({ onGenerate }: PasswordGeneratorF
     setOptions((prev) => ({ ...prev, length: value[0] }));
   };
   
-  const handleOptionChange = (option: keyof Omit<PasswordGeneratorOptions, "length">, checked: boolean) => {
+  const handleOptionChange = (option: "includeUppercase" | "includeLowercase" | "includeNumbers" | "includeSymbols", checked: boolean) => {
     setOptions((prev) => ({ ...prev, [option]: checked }));
   };
   
