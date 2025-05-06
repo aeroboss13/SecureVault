@@ -30,6 +30,7 @@ export const passwordShares = pgTable("password_shares", {
   viewed: boolean("viewed").notNull().default(false),
   viewedAt: timestamp("viewed_at"),
   active: boolean("active").notNull().default(true),
+  openedOnce: boolean("opened_once").notNull().default(false),
   createdAt: timestamp("created_at").notNull()
 });
 

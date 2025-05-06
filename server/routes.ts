@@ -276,6 +276,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "This link has expired or been revoked" });
       }
       
+      // Проверка на одноразовую ссылку
+      if (share.openedOnce) {
+        return res.status(410).json({ error: "This link has already been used and can only be accessed once" });
+      }
+      
       // Получаем все записи паролей, связанные с этой ссылкой
       const entries = await storage.getEntriesByShareToken(token);
       if (!entries || entries.length === 0) {
@@ -284,6 +289,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Получаем основную запись (для отметки о просмотре и логирования)
       const mainEntry = entries[0];
+      
+      // Отмечаем, что ссылка была открыта один раз
+      await storage.markShareAsOpened(share.id);
       
       // If not viewed yet, mark as viewed
       if (!share.viewed) {
@@ -321,6 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         services,
         expires: share.expiresAt,
         viewed: true,
+        oneTimeLink: true
       });
       
     } catch (error) {

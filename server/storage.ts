@@ -34,6 +34,8 @@ export interface IStorage {
   getShareEntriesByShareId(shareId: number): Promise<ShareEntry[]>;
   getEntriesByShareToken(token: string): Promise<PasswordEntry[]>;
   markShareAsViewed(id: number): Promise<void>;
+  markShareAsOpened(id: number): Promise<void>;
+  isShareOpenedOnce(id: number): Promise<boolean>;
   revokePasswordShare(id: number): Promise<void>;
   
   // Activity logs
@@ -137,7 +139,8 @@ export class MemStorage implements IStorage {
       createdAt, 
       viewed: false, 
       viewedAt: null,
-      active: true 
+      active: true,
+      openedOnce: false 
     };
     this.passwordShares.set(id, share);
     return share;
@@ -166,6 +169,19 @@ export class MemStorage implements IStorage {
       share.viewedAt = new Date();
       this.passwordShares.set(id, share);
     }
+  }
+  
+  async markShareAsOpened(id: number): Promise<void> {
+    const share = this.passwordShares.get(id);
+    if (share) {
+      share.openedOnce = true;
+      this.passwordShares.set(id, share);
+    }
+  }
+  
+  async isShareOpenedOnce(id: number): Promise<boolean> {
+    const share = this.passwordShares.get(id);
+    return share ? share.openedOnce : false;
   }
   
   async revokePasswordShare(id: number): Promise<void> {
