@@ -5,13 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Eye, EyeOff, Copy, Share2, Plus, Trash } from "lucide-react";
+import { Eye, EyeOff, Copy, Share2, Plus, Trash, Shield } from "lucide-react";
 import { 
   createPasswordSchema, 
   serviceSchema,
   type CreatePasswordForm, 
   type ServiceData 
 } from "@shared/schema";
+import { generateSpecialFormatPassword } from "@/lib/password-generator";
 
 import { 
   Form, 
@@ -237,7 +238,14 @@ export default function CreatePasswordForm() {
                     <FormItem className="sm:col-span-3">
                       <FormLabel>URL сервиса</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com" {...field} />
+                        <Input 
+                          placeholder="https://example.com" 
+                          value={field.value || ''} 
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -295,6 +303,24 @@ export default function CreatePasswordForm() {
                   <FormLabel className="block text-sm font-medium text-neutral-700">
                     Генератор паролей
                   </FormLabel>
+                  
+                  {index === 0 && (
+                    <div className="mt-2 mb-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="flex items-center text-sm"
+                        onClick={() => {
+                          const specialPassword = generateSpecialFormatPassword();
+                          handlePasswordGeneration(specialPassword, 0);
+                        }}
+                      >
+                        <Shield className="h-4 w-4 mr-2 text-primary-600" />
+                        Сгенерировать специальный пароль (3 строчные + 4 цифры + 3 прописные + спецсимвол)
+                      </Button>
+                    </div>
+                  )}
+                  
                   <div className="mt-1">
                     <PasswordGeneratorForm onGenerate={(password) => handlePasswordGeneration(password, index)} />
                   </div>
