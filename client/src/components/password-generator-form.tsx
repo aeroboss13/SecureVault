@@ -14,10 +14,10 @@ interface PasswordGeneratorFormProps {
 export default function PasswordGeneratorForm({ onGenerate }: PasswordGeneratorFormProps) {
   const [options, setOptions] = useState<PasswordGeneratorOptions>({
     length: 16,
-    uppercase: true,
-    lowercase: true,
-    numbers: true,
-    symbols: true,
+    includeUppercase: true,
+    includeLowercase: true,
+    includeNumbers: true,
+    includeSymbols: true,
   });
   
   const handleLengthChange = (value: number[]) => {
@@ -55,38 +55,38 @@ export default function PasswordGeneratorForm({ onGenerate }: PasswordGeneratorF
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
         <div className="flex items-center space-x-2">
           <Switch
-            id="uppercase"
-            checked={options.uppercase}
-            onCheckedChange={(checked) => handleOptionChange("uppercase", checked)}
+            id="includeUppercase"
+            checked={options.includeUppercase}
+            onCheckedChange={(checked) => handleOptionChange("includeUppercase", checked)}
           />
-          <Label htmlFor="uppercase" className="text-sm">A-Z</Label>
+          <Label htmlFor="includeUppercase" className="text-sm">A-Z</Label>
         </div>
         
         <div className="flex items-center space-x-2">
           <Switch
-            id="lowercase"
-            checked={options.lowercase}
-            onCheckedChange={(checked) => handleOptionChange("lowercase", checked)}
+            id="includeLowercase"
+            checked={options.includeLowercase}
+            onCheckedChange={(checked) => handleOptionChange("includeLowercase", checked)}
           />
-          <Label htmlFor="lowercase" className="text-sm">a-z</Label>
+          <Label htmlFor="includeLowercase" className="text-sm">a-z</Label>
         </div>
         
         <div className="flex items-center space-x-2">
           <Switch
-            id="numbers"
-            checked={options.numbers}
-            onCheckedChange={(checked) => handleOptionChange("numbers", checked)}
+            id="includeNumbers"
+            checked={options.includeNumbers}
+            onCheckedChange={(checked) => handleOptionChange("includeNumbers", checked)}
           />
-          <Label htmlFor="numbers" className="text-sm">0-9</Label>
+          <Label htmlFor="includeNumbers" className="text-sm">0-9</Label>
         </div>
         
         <div className="flex items-center space-x-2">
           <Switch
-            id="symbols"
-            checked={options.symbols}
-            onCheckedChange={(checked) => handleOptionChange("symbols", checked)}
+            id="includeSymbols"
+            checked={options.includeSymbols}
+            onCheckedChange={(checked) => handleOptionChange("includeSymbols", checked)}
           />
-          <Label htmlFor="symbols" className="text-sm">!@#$</Label>
+          <Label htmlFor="includeSymbols" className="text-sm">!@#$</Label>
         </div>
       </div>
       
