@@ -161,7 +161,7 @@ export default function AuthPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
                   <div className="text-sm text-center text-neutral-600">
-                    Don't have an account?{" "}
+                    Нет аккаунта?{" "}
                     <button
                       onClick={() => setActiveTab("register")}
                       className="text-primary-600 hover:text-primary-800 font-medium"
