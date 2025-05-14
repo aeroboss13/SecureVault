@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { predefinedServices } from "@/lib/services";
 import { useForm, useFieldArray } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -224,7 +225,30 @@ export default function CreatePasswordForm() {
                     <FormItem className="sm:col-span-3">
                       <FormLabel>Название сервиса</FormLabel>
                       <FormControl>
-                        <Input placeholder="AWS, GitHub, Dropbox, etc." {...field} />
+                        <select
+                          className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            const service = predefinedServices.find(s => s.name === e.target.value);
+                            if (service) {
+                              form.setValue(`services.${index}.serviceUrl`, service.url);
+                            }
+                            
+                            // Если выбрана почта, генерируем специальный пароль
+                            if (service?.name === "Почта") {
+                              const specialPassword = generateSpecialFormatPassword();
+                              form.setValue(`services.${index}.password`, specialPassword);
+                            }
+                          }}
+                        >
+                          <option value="">Выберите сервис...</option>
+                          {predefinedServices.map(service => (
+                            <option key={service.name} value={service.name}>
+                              {service.name}
+                            </option>
+                          ))}
+                        </select>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
