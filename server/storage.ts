@@ -50,7 +50,7 @@ export interface IStorage {
   getViewedSharesCount(adminId: number): Promise<number>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 const MemoryStore = createMemoryStore(session);
@@ -62,7 +62,7 @@ export class MemStorage implements IStorage {
   private shareEntries: Map<number, ShareEntry>;
   private activityLogs: Map<number, ActivityLog>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: any;
   
   private userIdCounter: number;
   private entryIdCounter: number;
@@ -244,7 +244,17 @@ export class MemStorage implements IStorage {
   async createActivityLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
     const id = this.logIdCounter++;
     const createdAt = new Date();
-    const log: ActivityLog = { ...insertLog, id, createdAt };
+    const log: ActivityLog = { 
+      ...insertLog, 
+      id, 
+      createdAt,
+      adminId: insertLog.adminId ?? null,
+      serviceName: insertLog.serviceName ?? null,
+      recipientEmail: insertLog.recipientEmail ?? null,
+      status: insertLog.status ?? null,
+      viewedAt: insertLog.viewedAt ?? null,
+      expiresAt: insertLog.expiresAt ?? null
+    };
     this.activityLogs.set(id, log);
     return log;
   }
