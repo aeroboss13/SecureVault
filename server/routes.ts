@@ -270,10 +270,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Share not found" });
       }
       
-      // Check if expired or inactive
+      // Check if inactive
+      if (!share.active) {
+        return res.status(410).json({ error: "This link has been revoked" });
+      }
+      
+      // Check if expired only if it has been viewed before
       const now = new Date();
-      if (now > share.expiresAt || !share.active) {
-        return res.status(410).json({ error: "This link has expired or been revoked" });
+      if (share.viewed && now > share.expiresAt) {
+        return res.status(410).json({ error: "This link has expired" });
       }
       
       // Проверка на одноразовую ссылку
