@@ -191,7 +191,10 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
                   {log.recipientEmail || "-"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                  {formatDateTime(new Date(log.createdAt))}
+                  {log.action === "Password Viewed" && log.viewedAt ? 
+                    formatDateTime(new Date(log.viewedAt)) : 
+                    formatDateTime(new Date(log.createdAt))
+                  }
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
                   {log.viewedAt ? formatDateTime(new Date(log.viewedAt)) : "-"}
