@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Отмечаем, что ссылка была открыта один раз
       await storage.markShareAsOpened(share.id);
       
-      // If not viewed yet, mark as viewed
+      // If not viewed yet, mark as viewed and update expiration
       if (!share.viewed) {
         // Get current time as viewed time
         const viewedAt = new Date();
@@ -302,7 +302,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const expiresAt = new Date(viewedAt);
         expiresAt.setMinutes(expiresAt.getMinutes() + 60);
         
+        // Mark as viewed and update expiration time
         await storage.markShareAsViewed(share.id);
+        await storage.updateShareExpiration(share.id, expiresAt);
         
         // Log activity with viewed and expiry times
         await storage.createActivityLog({
@@ -316,6 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Get updated share to return correct expiration time
+      const updatedShare = await storage.getPasswordShare(share.id);
+      
       // Преобразуем все полученные записи в формат для отправки клиенту
       const services = entries.map(entry => ({
         id: entry.id,
@@ -327,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         services,
-        expires: share.expiresAt,
+        expires: updatedShare ? updatedShare.expiresAt : share.expiresAt,
         viewed: true,
         oneTimeLink: true
       });

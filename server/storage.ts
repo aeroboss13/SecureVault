@@ -37,6 +37,7 @@ export interface IStorage {
   markShareAsOpened(id: number): Promise<void>;
   isShareOpenedOnce(id: number): Promise<boolean>;
   revokePasswordShare(id: number): Promise<void>;
+  updateShareExpiration(id: number, expiresAt: Date): Promise<void>;
   
   // Activity logs
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
@@ -104,8 +105,11 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const createdAt = new Date();
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      isAdmin: insertUser.isAdmin ?? false 
+    };
     this.users.set(id, user);
     return user;
   }
@@ -114,7 +118,12 @@ export class MemStorage implements IStorage {
   async createPasswordEntry(insertEntry: InsertPasswordEntry): Promise<PasswordEntry> {
     const id = this.entryIdCounter++;
     const createdAt = new Date();
-    const entry: PasswordEntry = { ...insertEntry, id, createdAt };
+    const entry: PasswordEntry = { 
+      ...insertEntry, 
+      id, 
+      createdAt,
+      serviceUrl: insertEntry.serviceUrl ?? null
+    };
     this.passwordEntries.set(id, entry);
     return entry;
   }
@@ -140,7 +149,8 @@ export class MemStorage implements IStorage {
       viewed: false, 
       viewedAt: null,
       active: true,
-      openedOnce: false 
+      openedOnce: false,
+      recipientEmail: insertShare.recipientEmail ?? null
     };
     this.passwordShares.set(id, share);
     return share;
@@ -188,6 +198,14 @@ export class MemStorage implements IStorage {
     const share = this.passwordShares.get(id);
     if (share) {
       share.active = false;
+      this.passwordShares.set(id, share);
+    }
+  }
+
+  async updateShareExpiration(id: number, expiresAt: Date): Promise<void> {
+    const share = this.passwordShares.get(id);
+    if (share) {
+      share.expiresAt = expiresAt;
       this.passwordShares.set(id, share);
     }
   }
