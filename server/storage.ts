@@ -143,14 +143,17 @@ export class MemStorage implements IStorage {
     const id = this.shareIdCounter++;
     const createdAt = new Date();
     const share: PasswordShare = { 
-      ...insertShare, 
-      id, 
+      id,
+      adminId: insertShare.adminId,
+      entryId: insertShare.entryId,
+      recipientEmail: insertShare.recipientEmail ?? null,
+      shareToken: insertShare.shareToken,
+      expiresAt: insertShare.expiresAt ?? null,
       createdAt, 
       viewed: false, 
       viewedAt: null,
       active: true,
-      openedOnce: false,
-      recipientEmail: insertShare.recipientEmail ?? null
+      openedOnce: false
     };
     this.passwordShares.set(id, share);
     return share;
@@ -272,7 +275,7 @@ export class MemStorage implements IStorage {
       (share) => 
         share.adminId === adminId && 
         share.active === true && 
-        share.expiresAt > now
+        (!share.expiresAt || share.expiresAt > now)
     ).length;
   }
   
@@ -295,6 +298,7 @@ export class MemStorage implements IStorage {
       (share) => 
         share.adminId === adminId && 
         share.active === true && 
+        share.expiresAt &&
         share.expiresAt > now && 
         share.expiresAt < thirtyMinutesFromNow
     ).length;

@@ -128,10 +128,12 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
         </thead>
         <tbody className="bg-white divide-y divide-neutral-200">
           {activeShares.map(({ share, entry }) => {
-            const expiryTimeText = formatExpiryTime(new Date(share.expiresAt));
-            const expiryPercentage = getExpiryPercentage(new Date(share.expiresAt));
-            const isExpiringWithinHour = expiryPercentage <= 50;
-            const timeRemaining = getTimeRemaining(share.expiresAt);
+            // Only show timer if link has been viewed (opened) and has expiration
+            const hasExpiration = share.expiresAt && share.viewed;
+            const expiryTimeText = hasExpiration ? formatExpiryTime(new Date(share.expiresAt)) : "";
+            const expiryPercentage = hasExpiration ? getExpiryPercentage(new Date(share.expiresAt)) : 0;
+            const isExpiringWithinHour = hasExpiration && expiryPercentage <= 50;
+            const timeRemaining = hasExpiration ? getTimeRemaining(share.expiresAt) : "";
             const expiresInClass = isExpiringWithinHour ? "text-red-600 font-medium" : "text-green-600 font-medium";
             
             return (
@@ -172,23 +174,31 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <svg className={cn(
-                      "h-5 w-5 mr-1.5",
-                      isExpiringWithinHour ? "text-red-500" : "text-green-500"
-                    )} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className={cn("text-sm", expiresInClass)}>
-                      {timeRemaining}
-                    </span>
-                  </div>
-                  <div className="w-full h-1.5 mt-1 bg-neutral-200 rounded-full overflow-hidden">
-                    <div className={cn(
-                      "timer-progress h-full",
-                      isExpiringWithinHour ? "bg-red-500" : "bg-green-500"
-                    )} style={{ width: `${expiryPercentage}%` }}></div>
-                  </div>
+                  {hasExpiration ? (
+                    <div className="flex items-center">
+                      <svg className={cn(
+                        "h-5 w-5 mr-1.5",
+                        isExpiringWithinHour ? "text-red-500" : "text-green-500"
+                      )} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className={cn("text-sm", expiresInClass)}>
+                        {timeRemaining}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-neutral-500">
+                      {share.viewed ? "Expired" : "Timer starts when opened"}
+                    </div>
+                  )}
+                  {hasExpiration && (
+                    <div className="w-full h-1.5 mt-1 bg-neutral-200 rounded-full overflow-hidden">
+                      <div className={cn(
+                        "timer-progress h-full",
+                        isExpiringWithinHour ? "bg-red-500" : "bg-green-500"
+                      )} style={{ width: `${expiryPercentage}%` }}></div>
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={cn(

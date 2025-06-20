@@ -25,7 +25,7 @@ export const passwordShares = pgTable("password_shares", {
   adminId: integer("admin_id").notNull(),
   recipientEmail: text("recipient_email"),
   shareToken: text("share_token").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   viewed: boolean("viewed").notNull().default(false),
   viewedAt: timestamp("viewed_at"),
