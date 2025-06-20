@@ -4,11 +4,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import logoSrc from "@/assets/logo.png";
-import { Shield, Loader2, Clock, ExternalLink, AlertTriangle, CheckCircle } from "lucide-react";
+import { Shield, Loader2, Clock, ExternalLink, AlertTriangle, CheckCircle, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import CopyField from "@/components/copy-field";
 import CountdownTimer from "@/components/countdown-timer";
+import { downloadAsTextFile } from "@/lib/download-utils";
 
 interface ServiceCredential {
   id: number;
@@ -131,6 +132,29 @@ export default function ViewPassword() {
   // Handle confirmed save
   const handleConfirmSave = () => {
     confirmMutation.mutate();
+  };
+
+  // Handle download data
+  const handleDownloadData = () => {
+    if (data && data.services) {
+      const services = data.services.map(service => ({
+        serviceName: service.serviceName,
+        serviceUrl: service.serviceUrl,
+        username: service.username,
+        password: service.password
+      }));
+      
+      downloadAsTextFile(
+        services, 
+        data.comment || undefined, 
+        `access-data-${new Date().toISOString().split('T')[0]}.txt`
+      );
+      
+      toast({
+        title: "Файл скачан",
+        description: "Данные доступа сохранены в текстовый файл",
+      });
+    }
   };
   
   if (isLoading) {
@@ -286,31 +310,43 @@ export default function ViewPassword() {
               </div>
 
               <div className="bg-neutral-50 p-4 flex flex-col items-center justify-center rounded-md">
-                <p className="text-xs text-neutral-500 mb-2 text-center">
-                  Чтобы подтвердить, что вы сохранили данные доступа, нажмите кнопку ниже:
+                <p className="text-xs text-neutral-500 mb-3 text-center">
+                  Сохраните данные доступа в надежное место или скачайте файл
                 </p>
-                <Button 
-                  onClick={handleConfirmSave}
-                  disabled={savedConfirmed || confirmMutation.isPending}
-                  className="flex items-center"
-                >
-                  {confirmMutation.isPending ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-1.5 animate-spin" />
-                      Подтверждение...
-                    </>
-                  ) : savedConfirmed ? (
-                    <>
-                      <CheckCircle className="h-5 w-5 mr-1.5" />
-                      Данные сохранены
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-5 w-5 mr-1.5" />
-                      Я сохранил эти данные
-                    </>
-                  )}
-                </Button>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleDownloadData}
+                    variant="outline"
+                    className="flex items-center"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Скачать данные
+                  </Button>
+                  
+                  <Button 
+                    onClick={handleConfirmSave}
+                    disabled={savedConfirmed || confirmMutation.isPending}
+                    className="flex items-center"
+                  >
+                    {confirmMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-1.5 animate-spin" />
+                        Подтверждение...
+                      </>
+                    ) : savedConfirmed ? (
+                      <>
+                        <CheckCircle className="h-5 w-5 mr-1.5" />
+                        Данные сохранены
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="h-5 w-5 mr-1.5" />
+                        Я сохранил эти данные
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Eye, EyeOff, Copy, Share2, Plus, Trash, Shield } from "lucide-react";
+import { Eye, EyeOff, Copy, Share2, Plus, Trash, Shield, Download } from "lucide-react";
 import { 
   createPasswordSchema, 
   serviceSchema,
@@ -14,6 +14,7 @@ import {
   type ServiceData 
 } from "@shared/schema";
 import { generateSpecialFormatPassword } from "@/lib/password-generator";
+import { downloadAsTextFile } from "@/lib/download-utils";
 
 import { 
   Form, 
@@ -46,6 +47,8 @@ export default function CreatePasswordForm() {
     serviceName: "",
     username: ""
   });
+  const [createdEntries, setCreatedEntries] = useState<any[]>([]);
+  const [shareComment, setShareComment] = useState<string>("");
   
   const form = useForm<CreatePasswordForm>({
     resolver: zodResolver(createPasswordSchema),
@@ -83,6 +86,11 @@ export default function CreatePasswordForm() {
         // Генерируем URL для ссылки
         const url = `${window.location.origin}/view/${result.share.shareToken}`;
         const firstEntry = result.entries[0];
+        
+        // Сохраняем данные для скачивания
+        setCreatedEntries(result.entries);
+        const formData = form.getValues();
+        setShareComment(formData.comment || "");
         
         // Устанавливаем состояние для диалога
         setShareUrl(url);
@@ -168,6 +176,29 @@ export default function CreatePasswordForm() {
       title: "Ссылка скопирована",
       description: "Ссылка скопирована в буфер обмена",
     });
+  };
+
+  // Function to download data as text file
+  const handleDownloadData = () => {
+    if (createdEntries.length > 0) {
+      const services = createdEntries.map(entry => ({
+        serviceName: entry.serviceName,
+        serviceUrl: entry.serviceUrl,
+        username: entry.username,
+        password: entry.password
+      }));
+      
+      downloadAsTextFile(
+        services, 
+        shareComment || undefined, 
+        `access-data-${new Date().toISOString().split('T')[0]}.txt`
+      );
+      
+      toast({
+        title: "Файл скачан",
+        description: "Данные доступа сохранены в текстовый файл",
+      });
+    }
   };
 
   return (
@@ -410,6 +441,53 @@ export default function CreatePasswordForm() {
           </div>
         </form>
       </Form>
+
+      {/* Dialog for sharing URL */}
+      <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <Share2 className="h-5 w-5 mr-2 text-green-600" />
+              Ссылка для доступа создана
+            </DialogTitle>
+            <DialogDescription>
+              Ваша ссылка готова! Пароль для сервиса "{shareInfo.serviceName}" (пользователь: {shareInfo.username}) создан.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex items-center space-x-2">
+            <div className="grid flex-1 gap-2">
+              <label htmlFor="link" className="sr-only">
+                Ссылка
+              </label>
+              <input
+                id="link"
+                defaultValue={shareUrl}
+                readOnly
+                className="px-3 py-2 border border-neutral-300 rounded-md text-sm bg-neutral-50"
+              />
+            </div>
+            <Button type="button" size="sm" className="px-3" onClick={copyShareUrl}>
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          
+          <DialogFooter className="flex justify-between sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDownloadData}
+              className="flex items-center"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Скачать данные
+            </Button>
+            <Button onClick={() => setShareDialogOpen(false)}>
+              Готово
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
