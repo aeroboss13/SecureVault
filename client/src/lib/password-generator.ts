@@ -1,9 +1,9 @@
 import { PasswordGeneratorOptions } from '@shared/schema';
 
-const LOWERCASE_CHARS = 'abcdefghijklmnopqrstuvwxyz';
-const UPPERCASE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const LOWERCASE_CHARS = 'abcdefghjklmnopqrstuvwxyz';
+const UPPERCASE_CHARS = 'ABCDEFGHJKLMNOPQRSTUVWXYZ';
 const NUMBER_CHARS = '0123456789';
-const SYMBOL_CHARS = '!@#$%^&*()-_=+[]{};:,.<>?';
+const SYMBOL_CHARS = '!@#$%&*';
 
 /**
  * Генерирует пароль специального формата для первого сервиса:
