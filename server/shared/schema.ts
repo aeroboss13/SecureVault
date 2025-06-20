@@ -30,6 +30,8 @@ export const passwordShares = pgTable("password_shares", {
   viewed: boolean("viewed").notNull().default(false),
   viewedAt: timestamp("viewed_at"),
   active: boolean("active").notNull().default(true),
+  openedOnce: boolean("opened_once").notNull().default(false),
+  comment: text("comment")
 });
 
 export const shareEntries = pgTable("share_entries", {
@@ -71,6 +73,7 @@ export const insertPasswordShareSchema = createInsertSchema(passwordShares).pick
   recipientEmail: true,
   shareToken: true,
   expiresAt: true,
+  comment: true
 });
 
 export const insertShareEntrySchema = createInsertSchema(shareEntries).pick({
@@ -120,6 +123,7 @@ export const serviceSchema = z.object({
 export const createPasswordSchema = z.object({
   services: z.array(serviceSchema),
   recipientEmail: z.string().email("Invalid email address").optional(),
+  comment: z.string().optional()
 });
 
 export const passwordGeneratorSchema = z.object({

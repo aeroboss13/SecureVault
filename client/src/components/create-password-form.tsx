@@ -72,7 +72,8 @@ export default function CreatePasswordForm() {
       // Используем новый batch endpoint для создания всех паролей и ссылки одновременно
       const res = await apiRequest("POST", "/api/passwords/batch", {
         services: data.services,
-        recipientEmail: "user@example.com" // Требуется API, но не будет использоваться для отправки email
+        recipientEmail: "user@example.com", // Требуется API, но не будет использоваться для отправки email
+        comment: data.comment
       });
       return res.json();
     },
@@ -369,6 +370,25 @@ export default function CreatePasswordForm() {
               </div>
             </div>
           ))}
+
+          {/* Поле комментария */}
+          <FormField
+            control={form.control}
+            name="comment"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Комментарий для пользователя (необязательно)</FormLabel>
+                <FormControl>
+                  <textarea
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Добавьте комментарий для пользователя (например, инструкции по использованию пароля)"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
           <div className="flex justify-between">
             <Button

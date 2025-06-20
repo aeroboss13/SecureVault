@@ -58,7 +58,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "Unauthorized" });
       }
       
-      const { services, recipientEmail } = req.body;
+      const { services, recipientEmail, comment } = req.body;
       
       if (!Array.isArray(services) || services.length === 0) {
         return res.status(400).json({ error: "At least one service is required" });
@@ -105,7 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           adminId: req.user.id,
           recipientEmail,
           shareToken,
-          expiresAt
+          expiresAt,
+          comment
         });
         
         // Создаем связи между ссылкой и всеми записями паролей
@@ -335,7 +336,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         services,
         expires: updatedShare ? updatedShare.expiresAt : share.expiresAt,
         viewed: true,
-        oneTimeLink: true
+        oneTimeLink: true,
+        comment: updatedShare ? updatedShare.comment : share.comment
       });
       
     } catch (error) {

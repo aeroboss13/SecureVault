@@ -153,7 +153,8 @@ export class MemStorage implements IStorage {
       viewed: false, 
       viewedAt: null,
       active: true,
-      openedOnce: false
+      openedOnce: false,
+      comment: insertShare.comment ?? null
     };
     this.passwordShares.set(id, share);
     return share;

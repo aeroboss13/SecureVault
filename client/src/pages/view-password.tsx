@@ -22,6 +22,7 @@ interface SharedPassword {
   services: ServiceCredential[];
   expires: string;
   viewed: boolean;
+  comment?: string;
 }
 
 export default function ViewPassword() {
@@ -204,6 +205,23 @@ export default function ViewPassword() {
                 Эта страница будет самоуничтожена по истечении времени.
               </p>
             </div>
+
+            {/* Комментарий администратора */}
+            {data.comment && (
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <CheckCircle className="h-5 w-5 text-blue-400" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-blue-800">Комментарий от администратора</h3>
+                    <div className="mt-2 text-sm text-blue-700">
+                      <p>{data.comment}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-8">
               {data.services.map((service, index) => (
