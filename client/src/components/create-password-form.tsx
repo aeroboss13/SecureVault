@@ -49,6 +49,8 @@ export default function CreatePasswordForm() {
   });
   const [createdEntries, setCreatedEntries] = useState<any[]>([]);
   const [shareComment, setShareComment] = useState<string>("");
+  const [customServiceNames, setCustomServiceNames] = useState<{[key: number]: string}>({});
+  const [selectedServices, setSelectedServices] = useState<{[key: number]: string}>({});
   
   const form = useForm<CreatePasswordForm>({
     resolver: zodResolver(createPasswordSchema),
@@ -260,15 +262,28 @@ export default function CreatePasswordForm() {
                         <div className="space-y-2">
                           <select
                             className="w-full h-10 px-3 py-2 rounded-md border border-input bg-background text-sm"
-                            value={field.value}
+                            value={selectedServices[index] || ""}
                             onChange={(e) => {
                               const selectedValue = e.target.value;
-                              field.onChange(selectedValue);
+                              setSelectedServices(prev => ({ ...prev, [index]: selectedValue }));
                               
                               if (selectedValue === "Другое") {
+                                // Очищаем URL и готовимся к вводу кастомного названия
                                 form.setValue(`services.${index}.serviceUrl`, "");
+                                setCustomServiceNames(prev => ({ ...prev, [index]: "" }));
+                                // Очищаем поле формы для названия сервиса
+                                field.onChange("");
                                 return;
                               }
+                              
+                              // Убираем кастомное название если выбрали предустановленный сервис
+                              setCustomServiceNames(prev => {
+                                const newState = { ...prev };
+                                delete newState[index];
+                                return newState;
+                              });
+                              
+                              field.onChange(selectedValue);
                               
                               const service = predefinedServices.find(s => s.name === selectedValue);
                               if (service) {
@@ -289,11 +304,14 @@ export default function CreatePasswordForm() {
                               </option>
                             ))}
                           </select>
-                          {field.value === "Другое" && (
+                          {selectedServices[index] === "Другое" && (
                             <Input
                               placeholder="Введите название сервиса"
+                              value={customServiceNames[index] || ""}
                               onChange={(e) => {
-                                field.onChange(e.target.value);
+                                const newValue = e.target.value;
+                                setCustomServiceNames(prev => ({ ...prev, [index]: newValue }));
+                                field.onChange(newValue);
                               }}
                             />
                           )}
