@@ -17,10 +17,10 @@ export function formatUsername(username: string, serviceName: string): string {
     }
     return cleanUsername;
   } else if (serviceName === "CRM") {
-    // Добавляем суффикс @freshauto.ru если его нет
-    if (!cleanUsername.includes("@")) {
-      // Убираем существующие суффиксы
-      const withoutSuffix = cleanUsername.replace(/@.*$/, "");
+    // Всегда добавляем @freshauto.ru в конец
+    // Убираем любые существующие суффиксы
+    const withoutSuffix = cleanUsername.replace(/@.*$/, "");
+    if (withoutSuffix.trim()) {
       const result = `${withoutSuffix}@freshauto.ru`;
       console.log('Formatted for CRM:', result);
       return result;

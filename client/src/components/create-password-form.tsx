@@ -532,7 +532,8 @@ export default function CreatePasswordForm() {
                             setTimeout(() => {
                               if (selectedService && value.trim()) {
                                 const formattedValue = formatUsername(value, selectedService);
-                                if (formattedValue !== value) {
+                                // Для CRM всегда применяем форматирование
+                                if (selectedService === "CRM" || formattedValue !== value) {
                                   console.log('Applying formatting:', formattedValue);
                                   field.onChange(formattedValue);
                                 }
