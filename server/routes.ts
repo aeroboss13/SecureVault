@@ -416,8 +416,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: "Success"
       });
 
+      // Берем имя пользователя из первой записи для названия файла
+      const firstUsername = entries.length > 0 ? entries[0].username : 'backup';
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `${firstUsername}-${currentDate}.json`;
+
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="passwords-backup-${new Date().toISOString().split('T')[0]}.json"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.json(backupData);
     } catch (error) {
       res.status(500).json({ error: error.message });

@@ -296,15 +296,20 @@ export default function CreatePasswordForm() {
         password: entry.password
       }));
       
+      // Берем имя пользователя из первого блока данных
+      const firstUsername = createdEntries[0]?.username || 'user';
+      const currentDate = new Date().toISOString().split('T')[0];
+      const filename = `${firstUsername}-${currentDate}.txt`;
+      
       downloadAsTextFile(
         services, 
         shareComment || undefined, 
-        `access-data-${new Date().toISOString().split('T')[0]}.txt`
+        filename
       );
       
       toast({
         title: "Файл скачан",
-        description: "Данные доступа сохранены в текстовый файл",
+        description: `Данные доступа сохранены в файл: ${filename}`,
       });
     }
   };
