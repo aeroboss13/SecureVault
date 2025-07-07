@@ -41,11 +41,11 @@ export default function CountdownTimer({ expiresAt }: CountdownTimerProps) {
         <div className="flex items-center">
           <Clock className={cn(
             "h-5 w-5 mr-1",
-            isExpired ? "text-red-400" : isExpiringSoon ? "text-red-300" : isWarning ? "text-yellow-300" : "text-white"
+            isExpired ? "text-red-600" : isExpiringSoon ? "text-red-600" : isWarning ? "text-yellow-600" : "text-gray-900"
           )} />
           <span className={cn(
             "text-sm font-medium",
-            isExpired ? "text-red-400" : isExpiringSoon ? "text-red-300" : isWarning ? "text-yellow-300" : "text-white"
+            isExpired ? "text-red-600" : isExpiringSoon ? "text-red-600" : isWarning ? "text-yellow-600" : "text-gray-900"
           )}>
             {isExpired ? "Link has expired" : `Expires in: ${timeLeft}`}
           </span>

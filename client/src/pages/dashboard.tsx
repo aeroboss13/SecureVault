@@ -53,13 +53,13 @@ export default function Dashboard() {
   const logs = logsData || defaultLogs;
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <Navbar />
       
       <main className="flex-grow fade-in py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-2xl font-heading font-bold text-neutral-900">Admin Dashboard</h1>
-          <p className="mt-1 text-sm text-neutral-600">Manage password sharing and track user access</p>
+          <h1 className="text-2xl font-heading font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-gray-300">Manage password sharing and track user access</p>
         </div>
         
         {/* Stats Cards */}
@@ -72,9 +72,9 @@ export default function Dashboard() {
         )}
         
         {/* Create New Password Section */}
-        <div className="bg-white shadow rounded-lg mb-8">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-8">
           <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-lg leading-6 font-heading font-semibold text-neutral-900 mb-4">
+            <h2 className="text-lg leading-6 font-heading font-semibold text-neutral-900 dark:text-white mb-4">
               Create New Password Entry
             </h2>
             <CreatePasswordForm />
@@ -82,12 +82,12 @@ export default function Dashboard() {
         </div>
         
         {/* Active Password Shares */}
-        <div className="bg-white shadow rounded-lg mb-8">
-          <div className="px-4 py-5 border-b border-neutral-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-heading font-medium text-neutral-900">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-8">
+          <div className="px-4 py-5 border-b border-neutral-200 dark:border-gray-600 sm:px-6">
+            <h3 className="text-lg leading-6 font-heading font-medium text-neutral-900 dark:text-white">
               Active Password Shares
             </h3>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-neutral-500 dark:text-gray-300">
               One-time links that have been generated and are still active.
             </p>
           </div>
@@ -102,12 +102,12 @@ export default function Dashboard() {
         </div>
         
         {/* Recent Activity / History */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 border-b border-neutral-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-heading font-medium text-neutral-900">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
+          <div className="px-4 py-5 border-b border-neutral-200 dark:border-gray-600 sm:px-6">
+            <h3 className="text-lg leading-6 font-heading font-medium text-neutral-900 dark:text-white">
               Recent Activity
             </h3>
-            <p className="mt-1 text-sm text-neutral-500">
+            <p className="mt-1 text-sm text-neutral-500 dark:text-gray-300">
               Password sharing history and access logs.
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function Dashboard() {
             <HistoryTable logs={showHistoryAll ? logs : logs?.slice(0, 5)} />
           )}
           
-          <div className="px-4 py-3 bg-neutral-50 text-right sm:px-6">
+          <div className="px-4 py-3 bg-neutral-50 dark:bg-gray-700 text-right sm:px-6">
             <Button
               variant="outline"
               onClick={() => setShowHistoryAll(!showHistoryAll)}
@@ -131,9 +131,9 @@ export default function Dashboard() {
         </div>
       </main>
       
-      <footer className="bg-white">
+      <footer className="bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto py-6 px-4 overflow-hidden sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-neutral-400">
+          <p className="text-center text-sm text-neutral-400 dark:text-gray-300">
             &copy; {new Date().getFullYear()} Freshpass. All rights reserved.
           </p>
         </div>
