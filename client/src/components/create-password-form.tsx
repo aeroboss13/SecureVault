@@ -172,13 +172,62 @@ export default function CreatePasswordForm() {
           return;
         }
 
-        // Преобразуем данные в формат формы
-        const formServices = parsedServices.map(service => ({
-          serviceName: service.serviceName,
-          serviceUrl: service.serviceUrl || "",
-          username: service.username,
-          password: service.password,
-        }));
+        // Преобразуем данные в формат формы и подбираем соответствующие сервисы
+        const formServices = parsedServices.map((service, index) => {
+          // Нормализуем название сервиса для поиска
+          const normalizedServiceName = service.serviceName.toLowerCase().trim();
+          
+          // Ищем соответствующий предустановленный сервис
+          const matchingService = predefinedServices.find(predefined => {
+            const normalizedPredefined = predefined.name.toLowerCase();
+            
+            // Точное совпадение
+            if (normalizedServiceName === normalizedPredefined) {
+              return true;
+            }
+            
+            // Частичное совпадение в обе стороны
+            if (normalizedServiceName.includes(normalizedPredefined) || 
+                normalizedPredefined.includes(normalizedServiceName)) {
+              return true;
+            }
+            
+            // Поиск по ключевым словам
+            const serviceWords = normalizedServiceName.split(/[\s\-_]+/);
+            const predefinedWords = normalizedPredefined.split(/[\s\-_]+/);
+            
+            return serviceWords.some(word => 
+              predefinedWords.some(predWord => 
+                word.length > 2 && predWord.length > 2 && 
+                (word.includes(predWord) || predWord.includes(word))
+              )
+            );
+          });
+
+          // Если найден соответствующий сервис, используем его название и URL
+          if (matchingService) {
+            // Обновляем состояние выбранных сервисов
+            setSelectedServices(prev => ({ ...prev, [index]: matchingService.name }));
+            
+            return {
+              serviceName: matchingService.name,
+              serviceUrl: matchingService.url || "",
+              username: service.username,
+              password: service.password,
+            };
+          } else {
+            // Если не найден, используем "Другое" и кастомное название
+            setSelectedServices(prev => ({ ...prev, [index]: "Другое" }));
+            setCustomServiceNames(prev => ({ ...prev, [index]: service.serviceName }));
+            
+            return {
+              serviceName: service.serviceName,
+              serviceUrl: service.serviceUrl || "",
+              username: service.username,
+              password: service.password,
+            };
+          }
+        });
 
         // Обновляем форму с загруженными данными
         form.setValue("services", formServices);

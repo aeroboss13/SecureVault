@@ -55,10 +55,10 @@ export function parseBackupFile(fileContent: string): DownloadService[] {
     const jsonData = JSON.parse(fileContent);
     if (jsonData.entries && Array.isArray(jsonData.entries)) {
       return jsonData.entries.map((entry: any) => ({
-        serviceName: entry.serviceName,
+        serviceName: entry.serviceName.trim(),
         serviceUrl: entry.serviceUrl,
-        username: entry.username,
-        password: entry.password,
+        username: entry.username.trim(),
+        password: entry.password.trim(),
       }));
     }
   } catch (e) {
@@ -86,8 +86,9 @@ export function parseBackupFile(fileContent: string): DownloadService[] {
         }
         
         // Start new service
+        const serviceName = trimmed.split(':')[1].trim();
         currentService = {
-          serviceName: trimmed.split(':')[1].trim()
+          serviceName: serviceName
         };
       } else if (trimmed.startsWith('URL:')) {
         currentService.serviceUrl = trimmed.substring(4).trim();
