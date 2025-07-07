@@ -538,39 +538,24 @@ export default function CreatePasswordForm() {
                           placeholder="ivan.petrov" 
                           value={field.value || ''} 
                           onChange={(e) => {
-                            field.onChange(e.target.value);
-                          }}
-                          onBlur={(e) => {
-                            const rawValue = e.target.value;
-                            const selectedService = selectedServices[index];
+                            const value = e.target.value;
+                            field.onChange(value);
                             
-                            console.log('Username blur:', {
-                              rawValue,
-                              selectedService,
-                              index
-                            });
-                            
-                            // Применяем форматирование при потере фокуса
-                            let formattedValue = rawValue;
-                            
-                            if (selectedService === "ad\\терминал" && rawValue.trim()) {
-                              if (!rawValue.startsWith("crm\\")) {
-                                formattedValue = `crm\\${rawValue}`;
-                                console.log('Formatted for ad\\терминал:', formattedValue);
+                            // Применяем форматирование с небольшой задержкой
+                            setTimeout(() => {
+                              const selectedService = selectedServices[index];
+                              let formattedValue = value;
+                              
+                              if (selectedService === "ad\\терминал" && value.trim() && !value.startsWith("crm\\")) {
+                                formattedValue = `crm\\${value}`;
+                                form.setValue(`services.${index}.username`, formattedValue);
+                              } else if (selectedService === "crm" && value.trim() && !value.includes("@")) {
+                                formattedValue = `${value}@freshauto.ru`;
+                                form.setValue(`services.${index}.username`, formattedValue);
                               }
-                            } else if (selectedService === "crm" && rawValue.trim()) {
-                              if (!rawValue.includes("@")) {
-                                formattedValue = `${rawValue}@freshauto.ru`;
-                                console.log('Formatted for crm:', formattedValue);
-                              }
-                            }
-                            
-                            if (formattedValue !== rawValue) {
-                              field.onChange(formattedValue);
-                            }
-                            
-                            field.onBlur();
+                            }, 500);
                           }}
+                          onBlur={field.onBlur}
                           name={field.name}
                           ref={field.ref}
                         />
