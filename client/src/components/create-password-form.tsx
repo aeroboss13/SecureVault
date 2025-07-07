@@ -460,19 +460,15 @@ export default function CreatePasswordForm() {
                                 
                                 if (selectedValue === "ad\\терминал") {
                                   // Убираем существующие префиксы и добавляем crm\
-                                  const cleanUsername = currentUsername.replace(/^(crm\\|ad\\)/, "");
-                                  if (cleanUsername.length > 0) {
-                                    formattedUsername = `crm\\${cleanUsername}`;
-                                  }
+                                  const cleanUsername = currentUsername.replace(/^crm\\/, "");
+                                  formattedUsername = `crm\\${cleanUsername}`;
                                 } else if (selectedValue === "crm") {
                                   // Убираем существующие суффиксы и добавляем @freshauto.ru
                                   const cleanUsername = currentUsername.replace(/@.*$/, "");
-                                  if (cleanUsername.length > 0) {
-                                    formattedUsername = `${cleanUsername}@freshauto.ru`;
-                                  }
+                                  formattedUsername = `${cleanUsername}@freshauto.ru`;
                                 } else {
                                   // Для других сервисов убираем специальное форматирование
-                                  formattedUsername = currentUsername.replace(/^(crm\\|ad\\)/, "").replace(/@.*$/, "");
+                                  formattedUsername = currentUsername.replace(/^crm\\/, "").replace(/@.*$/, "");
                                 }
                                 
                                 form.setValue(`services.${index}.username`, formattedUsername);
@@ -542,33 +538,30 @@ export default function CreatePasswordForm() {
                           placeholder="ivan.petrov" 
                           value={field.value || ''} 
                           onChange={(e) => {
+                            field.onChange(e.target.value);
+                          }}
+                          onBlur={(e) => {
                             const rawValue = e.target.value;
                             const selectedService = selectedServices[index];
                             
-                            // Обрабатываем ввод с учетом специального форматирования
-                            let newValue = rawValue;
+                            // Применяем форматирование при потере фокуса
+                            let formattedValue = rawValue;
                             
-                            if (selectedService === "ad\\терминал") {
-                              // Для ad\терминал добавляем префикс crm\
-                              if (rawValue && !rawValue.startsWith("crm\\")) {
-                                // Убираем старый префикс если есть
-                                const cleanValue = rawValue.replace(/^crm\\/, "");
-                                if (cleanValue.length > 0) {
-                                  newValue = `crm\\${cleanValue}`;
-                                }
+                            if (selectedService === "ad\\терминал" && rawValue.trim()) {
+                              if (!rawValue.startsWith("crm\\")) {
+                                formattedValue = `crm\\${rawValue}`;
                               }
-                            } else if (selectedService === "crm") {
-                              // Для crm добавляем суффикс @freshauto.ru
-                              if (rawValue && !rawValue.includes("@")) {
-                                // Убираем старый суффикс если есть
-                                const cleanValue = rawValue.replace(/@.*$/, "");
-                                if (cleanValue.length > 0) {
-                                  newValue = `${cleanValue}@freshauto.ru`;
-                                }
+                            } else if (selectedService === "crm" && rawValue.trim()) {
+                              if (!rawValue.includes("@")) {
+                                formattedValue = `${rawValue}@freshauto.ru`;
                               }
                             }
                             
-                            field.onChange(newValue);
+                            if (formattedValue !== rawValue) {
+                              field.onChange(formattedValue);
+                            }
+                            
+                            field.onBlur();
                           }}
                           onBlur={field.onBlur}
                           name={field.name}
