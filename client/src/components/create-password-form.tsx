@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Eye, EyeOff, Copy, Share2, Plus, Trash, Shield, Download } from "lucide-react";
+import { Eye, EyeOff, Copy, Share2, Plus, Trash, Shield, Download, Upload, FileText } from "lucide-react";
 import { 
   createPasswordSchema, 
   serviceSchema,
@@ -14,7 +14,7 @@ import {
   type ServiceData 
 } from "@shared/schema";
 import { generateSpecialFormatPassword } from "@/lib/password-generator";
-import { downloadAsTextFile } from "@/lib/download-utils";
+import { downloadAsTextFile, parseBackupFile } from "@/lib/download-utils";
 
 import { 
   Form, 
@@ -48,6 +48,7 @@ export default function CreatePasswordForm() {
     username: ""
   });
   const [createdEntries, setCreatedEntries] = useState<any[]>([]);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [shareComment, setShareComment] = useState<string>("");
   const [customServiceNames, setCustomServiceNames] = useState<{[key: number]: string}>({});
   const [selectedServices, setSelectedServices] = useState<{[key: number]: string}>({});
@@ -147,6 +148,62 @@ export default function CreatePasswordForm() {
     // Используем новый batch метод
     createPasswordBatchMutation.mutate(data);
   };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (!content) return;
+
+      try {
+        const parsedServices = parseBackupFile(content);
+        
+        if (parsedServices.length === 0) {
+          toast({
+            title: "Ошибка",
+            description: "Не удалось найти данные в файле или файл поврежден",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Преобразуем данные в формат формы
+        const formServices = parsedServices.map(service => ({
+          serviceName: service.serviceName,
+          serviceUrl: service.serviceUrl || "",
+          username: service.username,
+          password: service.password,
+        }));
+
+        // Обновляем форму с загруженными данными
+        form.setValue("services", formServices);
+        
+        toast({
+          title: "Успешно",
+          description: `Загружено ${parsedServices.length} сервисов из файла`,
+        });
+
+      } catch (error) {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось обработать файл. Проверьте формат файла.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    reader.readAsText(file);
+    event.target.value = "";
+  };
+
+  const clearUploadedFile = () => {
+    setUploadedFile(null);
+  };
   
   // Handle password generation for a specific service
   const handlePasswordGeneration = (generatedPassword: string, index: number) => {
@@ -234,6 +291,44 @@ export default function CreatePasswordForm() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <div className="mb-6 p-4 border rounded-lg bg-muted/50">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Upload className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <h3 className="font-medium">Загрузить из файла</h3>
+              <p className="text-sm text-muted-foreground">
+                Загрузите ранее скачанный файл с данными для автоматического заполнения формы
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {uploadedFile && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span>{uploadedFile.name}</span>
+              </div>
+            )}
+            <Input
+              type="file"
+              accept=".txt,.json"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="file-upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => document.getElementById('file-upload')?.click()}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Выбрать файл
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

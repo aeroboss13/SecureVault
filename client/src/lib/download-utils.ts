@@ -48,3 +48,63 @@ export function downloadAsTextFile(
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+
+export function parseBackupFile(fileContent: string): DownloadService[] {
+  try {
+    // Try to parse as JSON backup file first
+    const jsonData = JSON.parse(fileContent);
+    if (jsonData.entries && Array.isArray(jsonData.entries)) {
+      return jsonData.entries.map((entry: any) => ({
+        serviceName: entry.serviceName,
+        serviceUrl: entry.serviceUrl,
+        username: entry.username,
+        password: entry.password,
+      }));
+    }
+  } catch (e) {
+    // If JSON parsing fails, try to parse as text file
+    const services: DownloadService[] = [];
+    const lines = fileContent.split('\n');
+    
+    let currentService: Partial<DownloadService> = {};
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      // Skip empty lines and separators
+      if (!trimmed || trimmed.startsWith('=') || trimmed.startsWith('-') || 
+          trimmed.includes('ДАННЫЕ ДЛЯ ВХОДА') || trimmed.includes('КОММЕНТАРИЙ') ||
+          trimmed.includes('ВАЖНО') || trimmed.includes('Дата создания')) {
+        continue;
+      }
+      
+      // Check for service name
+      if (trimmed.startsWith('СЕРВИС ') && trimmed.includes(':')) {
+        // Save previous service if complete
+        if (currentService.serviceName && currentService.username && currentService.password) {
+          services.push(currentService as DownloadService);
+        }
+        
+        // Start new service
+        currentService = {
+          serviceName: trimmed.split(':')[1].trim()
+        };
+      } else if (trimmed.startsWith('URL:')) {
+        currentService.serviceUrl = trimmed.substring(4).trim();
+      } else if (trimmed.startsWith('Имя пользователя:')) {
+        currentService.username = trimmed.substring(17).trim();
+      } else if (trimmed.startsWith('Пароль:')) {
+        currentService.password = trimmed.substring(7).trim();
+      }
+    }
+    
+    // Add last service if complete
+    if (currentService.serviceName && currentService.username && currentService.password) {
+      services.push(currentService as DownloadService);
+    }
+    
+    return services;
+  }
+  
+  return [];
+}
