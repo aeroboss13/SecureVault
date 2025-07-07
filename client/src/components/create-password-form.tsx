@@ -523,13 +523,21 @@ export default function CreatePasswordForm() {
                             const value = e.target.value;
                             const selectedService = selectedServices[index];
                             
-                            // Применяем форматирование сразу
-                            if (selectedService && value.trim()) {
-                              const formattedValue = formatUsername(value, selectedService);
-                              field.onChange(formattedValue);
-                            } else {
-                              field.onChange(value);
-                            }
+                            console.log('Username onChange:', { value, selectedService, index });
+                            
+                            // Сначала обновляем поле
+                            field.onChange(value);
+                            
+                            // Затем применяем форматирование с задержкой
+                            setTimeout(() => {
+                              if (selectedService && value.trim()) {
+                                const formattedValue = formatUsername(value, selectedService);
+                                if (formattedValue !== value) {
+                                  console.log('Applying formatting:', formattedValue);
+                                  field.onChange(formattedValue);
+                                }
+                              }
+                            }, 100);
                           }}
                           onBlur={field.onBlur}
                           name={field.name}
