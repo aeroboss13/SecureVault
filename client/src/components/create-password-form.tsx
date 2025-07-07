@@ -209,10 +209,18 @@ export default function CreatePasswordForm() {
             // Обновляем состояние выбранных сервисов
             setSelectedServices(prev => ({ ...prev, [index]: matchingService.name }));
             
+            // Применяем форматирование имени пользователя в зависимости от сервиса
+            let formattedUsername = service.username;
+            if (matchingService.name === "ad\\терминал" && service.username && !service.username.startsWith("crm\\")) {
+              formattedUsername = `crm\\${service.username}`;
+            } else if (matchingService.name === "crm" && service.username && !service.username.includes("@")) {
+              formattedUsername = `${service.username}@freshauto.ru`;
+            }
+            
             return {
               serviceName: matchingService.name,
               serviceUrl: matchingService.url || "",
-              username: service.username,
+              username: formattedUsername,
               password: service.password,
             };
           } else {
@@ -231,6 +239,12 @@ export default function CreatePasswordForm() {
 
         // Обновляем форму с загруженными данными
         form.setValue("services", formServices);
+        
+        // Принудительно обновляем состояние компонента
+        setTimeout(() => {
+          // Trigger re-render to show updated values
+          setUploadedFile(file);
+        }, 100);
         
         toast({
           title: "Успешно",
