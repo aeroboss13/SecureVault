@@ -15,23 +15,13 @@ export default function BackupRestore() {
 
   const exportMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/backup/export", {
-        credentials: "include",
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to export data");
-      }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `passwords-backup-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Use a simple approach that works with authentication
+      const link = document.createElement("a");
+      link.href = "/api/backup/export";
+      link.download = `passwords-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
     onSuccess: () => {
       toast({
