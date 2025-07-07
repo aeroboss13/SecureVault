@@ -49,6 +49,15 @@ export interface IStorage {
   getExpiringSharesCount(adminId: number): Promise<number>;
   getViewedSharesCount(adminId: number): Promise<number>;
   
+  // Backup/Restore
+  exportPasswordEntries(adminId: number): Promise<PasswordEntry[]>;
+  importPasswordEntries(adminId: number, entries: Array<{
+    serviceName: string;
+    serviceUrl: string | null;
+    username: string;
+    password: string;
+  }>): Promise<void>;
+  
   // Session store
   sessionStore: any;
 }
@@ -309,6 +318,28 @@ export class MemStorage implements IStorage {
     return Array.from(this.passwordShares.values()).filter(
       (share) => share.adminId === adminId && share.viewed === true
     ).length;
+  }
+
+  async exportPasswordEntries(adminId: number): Promise<PasswordEntry[]> {
+    return Array.from(this.passwordEntries.values())
+      .filter(entry => entry.adminId === adminId);
+  }
+
+  async importPasswordEntries(adminId: number, entries: Array<{
+    serviceName: string;
+    serviceUrl: string | null;
+    username: string;
+    password: string;
+  }>): Promise<void> {
+    for (const entry of entries) {
+      await this.createPasswordEntry({
+        adminId,
+        serviceName: entry.serviceName,
+        serviceUrl: entry.serviceUrl,
+        username: entry.username,
+        password: entry.password,
+      });
+    }
   }
 }
 

@@ -10,6 +10,7 @@ import AuthPage from "@/pages/auth-page";
 import Dashboard from "@/pages/dashboard";
 import ViewPassword from "@/pages/view-password";
 import History from "@/pages/history";
+import Backup from "@/pages/backup";
 import LegalPage from "@/pages/legal-page";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
       {/* Protected admin routes */}
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/history" component={History} />
+      <ProtectedRoute path="/backup" component={Backup} />
       <ProtectedRoute path="/legal" component={LegalPage} />
       
       {/* Fallback to 404 */}

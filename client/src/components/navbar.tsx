@@ -20,6 +20,7 @@ import {
   X, 
   LayoutDashboard, 
   History,
+  Download,
   Scale
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ export default function Navbar() {
   const navigation = [
     { name: "Главная", href: "/", icon: LayoutDashboard },
     { name: "История", href: "/history", icon: History },
+    { name: "Резервное копирование", href: "/backup", icon: Download },
     { name: "Права", href: "/legal", icon: Scale },
   ];
   

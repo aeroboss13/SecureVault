@@ -3,10 +3,12 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { nanoid } from "nanoid";
+import multer from "multer";
 import { 
   insertPasswordEntrySchema,
   insertPasswordShareSchema,
-  insertActivityLogSchema
+  insertActivityLogSchema,
+  backupDataSchema
 } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -376,6 +378,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
       res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Setup multer for file uploads
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+  });
+
+  // Export password data as backup file
+  app.get("/api/backup/export", adminRequired, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const entries = await storage.exportPasswordEntries(req.user.id);
+      
+      const backupData = {
+        version: "1.0",
+        createdAt: new Date().toISOString(),
+        entries: entries.map(entry => ({
+          serviceName: entry.serviceName,
+          serviceUrl: entry.serviceUrl,
+          username: entry.username,
+          password: entry.password,
+        }))
+      };
+
+      // Log activity
+      await storage.createActivityLog({
+        adminId: req.user.id,
+        action: "Data Export",
+        serviceName: null,
+        recipientEmail: null,
+        status: "Success"
+      });
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="passwords-backup-${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(backupData);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Import password data from backup file
+  app.post("/api/backup/import", adminRequired, upload.single('backup'), async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const fileContent = req.file.buffer.toString('utf-8');
+      let backupData;
+      
+      try {
+        backupData = JSON.parse(fileContent);
+      } catch (parseError) {
+        return res.status(400).json({ error: "Invalid JSON format" });
+      }
+
+      // Validate backup data structure
+      const validatedData = backupDataSchema.parse(backupData);
+
+      // Import entries
+      await storage.importPasswordEntries(req.user.id, validatedData.entries);
+
+      // Log activity
+      await storage.createActivityLog({
+        adminId: req.user.id,
+        action: "Data Import",
+        serviceName: null,
+        recipientEmail: null,
+        status: "Success"
+      });
+
+      res.json({ 
+        message: "Data imported successfully", 
+        importedCount: validatedData.entries.length 
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
   });
 

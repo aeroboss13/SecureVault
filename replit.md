@@ -135,8 +135,16 @@ DATABASE_URL=postgresql://user:pass@host:port/database
 - Secure cookie configuration
 - CORS policy configuration
 
+## Recent Changes
+- July 07, 2025: Added backup/restore functionality
+  - Created backup/restore API endpoints with file upload support
+  - Implemented BackupRestore component for frontend interface
+  - Added multer for file handling with 5MB limit
+  - Integrated backup page into navigation and routing
+  - Supports JSON export/import of password data
+
 ## Changelog
-- July 07, 2025. Initial setup
+- July 07, 2025. Initial setup with backup/restore feature
 
 ## User Preferences
 

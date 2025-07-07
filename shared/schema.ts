@@ -135,8 +135,20 @@ export const passwordGeneratorSchema = z.object({
   includeSymbols: z.boolean().default(true)
 });
 
+export const backupDataSchema = z.object({
+  version: z.string(),
+  createdAt: z.string(),
+  entries: z.array(z.object({
+    serviceName: z.string(),
+    serviceUrl: z.string().nullable().optional(),
+    username: z.string(),
+    password: z.string(),
+  })),
+});
+
 // Export form types
 export type LoginForm = z.infer<typeof loginSchema>;
 export type ServiceData = z.infer<typeof serviceSchema>;
 export type CreatePasswordForm = z.infer<typeof createPasswordSchema>;
 export type PasswordGeneratorOptions = z.infer<typeof passwordGeneratorSchema>;
+export type BackupData = z.infer<typeof backupDataSchema>;
