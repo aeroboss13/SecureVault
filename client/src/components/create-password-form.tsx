@@ -544,16 +544,24 @@ export default function CreatePasswordForm() {
                             const rawValue = e.target.value;
                             const selectedService = selectedServices[index];
                             
+                            console.log('Username blur:', {
+                              rawValue,
+                              selectedService,
+                              index
+                            });
+                            
                             // Применяем форматирование при потере фокуса
                             let formattedValue = rawValue;
                             
                             if (selectedService === "ad\\терминал" && rawValue.trim()) {
                               if (!rawValue.startsWith("crm\\")) {
                                 formattedValue = `crm\\${rawValue}`;
+                                console.log('Formatted for ad\\терминал:', formattedValue);
                               }
                             } else if (selectedService === "crm" && rawValue.trim()) {
                               if (!rawValue.includes("@")) {
                                 formattedValue = `${rawValue}@freshauto.ru`;
+                                console.log('Formatted for crm:', formattedValue);
                               }
                             }
                             
@@ -563,7 +571,6 @@ export default function CreatePasswordForm() {
                             
                             field.onBlur();
                           }}
-                          onBlur={field.onBlur}
                           name={field.name}
                           ref={field.ref}
                         />
