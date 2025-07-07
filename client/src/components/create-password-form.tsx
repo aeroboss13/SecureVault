@@ -453,19 +453,26 @@ export default function CreatePasswordForm() {
                                 form.setValue(`services.${index}.serviceUrl`, service.url || "");
                               }
                               
-                              // Автоматическое форматирование имени пользователя
+                              // Автоматическое форматирование имени пользователя при выборе сервиса
                               const currentUsername = form.getValues(`services.${index}.username`) || "";
                               if (currentUsername.trim()) {
                                 let formattedUsername = currentUsername;
                                 
-                                if (selectedValue === "ad\\терминал" && !currentUsername.startsWith("crm\\")) {
-                                  // Убираем существующий префикс если есть
-                                  const cleanUsername = currentUsername.replace(/^crm\\/, "");
-                                  formattedUsername = `crm\\${cleanUsername}`;
-                                } else if (selectedValue === "crm" && !currentUsername.includes("@")) {
-                                  // Убираем существующий суффикс если есть
+                                if (selectedValue === "ad\\терминал") {
+                                  // Убираем существующие префиксы и добавляем crm\
+                                  const cleanUsername = currentUsername.replace(/^(crm\\|ad\\)/, "");
+                                  if (cleanUsername.length > 0) {
+                                    formattedUsername = `crm\\${cleanUsername}`;
+                                  }
+                                } else if (selectedValue === "crm") {
+                                  // Убираем существующие суффиксы и добавляем @freshauto.ru
                                   const cleanUsername = currentUsername.replace(/@.*$/, "");
-                                  formattedUsername = `${cleanUsername}@freshauto.ru`;
+                                  if (cleanUsername.length > 0) {
+                                    formattedUsername = `${cleanUsername}@freshauto.ru`;
+                                  }
+                                } else {
+                                  // Для других сервисов убираем специальное форматирование
+                                  formattedUsername = currentUsername.replace(/^(crm\\|ad\\)/, "").replace(/@.*$/, "");
                                 }
                                 
                                 form.setValue(`services.${index}.username`, formattedUsername);
@@ -535,14 +542,30 @@ export default function CreatePasswordForm() {
                           placeholder="ivan.petrov" 
                           value={field.value || ''} 
                           onChange={(e) => {
-                            let newValue = e.target.value;
+                            const rawValue = e.target.value;
                             const selectedService = selectedServices[index];
                             
-                            // Применяем форматирование в зависимости от выбранного сервиса
-                            if (selectedService === "ad\\терминал" && newValue && !newValue.startsWith("crm\\")) {
-                              newValue = `crm\\${newValue}`;
-                            } else if (selectedService === "crm" && newValue && !newValue.includes("@")) {
-                              newValue = `${newValue}@freshauto.ru`;
+                            // Обрабатываем ввод с учетом специального форматирования
+                            let newValue = rawValue;
+                            
+                            if (selectedService === "ad\\терминал") {
+                              // Для ad\терминал добавляем префикс crm\
+                              if (rawValue && !rawValue.startsWith("crm\\")) {
+                                // Убираем старый префикс если есть
+                                const cleanValue = rawValue.replace(/^crm\\/, "");
+                                if (cleanValue.length > 0) {
+                                  newValue = `crm\\${cleanValue}`;
+                                }
+                              }
+                            } else if (selectedService === "crm") {
+                              // Для crm добавляем суффикс @freshauto.ru
+                              if (rawValue && !rawValue.includes("@")) {
+                                // Убираем старый суффикс если есть
+                                const cleanValue = rawValue.replace(/@.*$/, "");
+                                if (cleanValue.length > 0) {
+                                  newValue = `${cleanValue}@freshauto.ru`;
+                                }
+                              }
                             }
                             
                             field.onChange(newValue);
