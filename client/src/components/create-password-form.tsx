@@ -15,6 +15,7 @@ import {
 } from "@shared/schema";
 import { generateSpecialFormatPassword } from "@/lib/password-generator";
 import { downloadAsTextFile, parseBackupFile } from "@/lib/download-utils";
+import { formatUsername } from "@/lib/username-formatter";
 
 import { 
   Form, 
@@ -210,12 +211,7 @@ export default function CreatePasswordForm() {
             setSelectedServices(prev => ({ ...prev, [index]: matchingService.name }));
             
             // Применяем форматирование имени пользователя в зависимости от сервиса
-            let formattedUsername = service.username;
-            if (matchingService.name === "ad\\терминал" && service.username && !service.username.startsWith("crm\\")) {
-              formattedUsername = `crm\\${service.username}`;
-            } else if (matchingService.name === "crm" && service.username && !service.username.includes("@")) {
-              formattedUsername = `${service.username}@freshauto.ru`;
-            }
+            const formattedUsername = formatUsername(service.username, matchingService.name);
             
             return {
               serviceName: matchingService.name,
@@ -456,21 +452,7 @@ export default function CreatePasswordForm() {
                               // Автоматическое форматирование имени пользователя при выборе сервиса
                               const currentUsername = form.getValues(`services.${index}.username`) || "";
                               if (currentUsername.trim()) {
-                                let formattedUsername = currentUsername;
-                                
-                                if (selectedValue === "ad\\терминал") {
-                                  // Убираем существующие префиксы и добавляем crm\
-                                  const cleanUsername = currentUsername.replace(/^crm\\/, "");
-                                  formattedUsername = `crm\\${cleanUsername}`;
-                                } else if (selectedValue === "crm") {
-                                  // Убираем существующие суффиксы и добавляем @freshauto.ru
-                                  const cleanUsername = currentUsername.replace(/@.*$/, "");
-                                  formattedUsername = `${cleanUsername}@freshauto.ru`;
-                                } else {
-                                  // Для других сервисов убираем специальное форматирование
-                                  formattedUsername = currentUsername.replace(/^crm\\/, "").replace(/@.*$/, "");
-                                }
-                                
+                                const formattedUsername = formatUsername(currentUsername, selectedValue);
                                 form.setValue(`services.${index}.username`, formattedUsername);
                               }
                               
@@ -539,21 +521,15 @@ export default function CreatePasswordForm() {
                           value={field.value || ''} 
                           onChange={(e) => {
                             const value = e.target.value;
-                            field.onChange(value);
+                            const selectedService = selectedServices[index];
                             
-                            // Применяем форматирование с небольшой задержкой
-                            setTimeout(() => {
-                              const selectedService = selectedServices[index];
-                              let formattedValue = value;
-                              
-                              if (selectedService === "ad\\терминал" && value.trim() && !value.startsWith("crm\\")) {
-                                formattedValue = `crm\\${value}`;
-                                form.setValue(`services.${index}.username`, formattedValue);
-                              } else if (selectedService === "crm" && value.trim() && !value.includes("@")) {
-                                formattedValue = `${value}@freshauto.ru`;
-                                form.setValue(`services.${index}.username`, formattedValue);
-                              }
-                            }, 500);
+                            // Применяем форматирование сразу
+                            if (selectedService && value.trim()) {
+                              const formattedValue = formatUsername(value, selectedService);
+                              field.onChange(formattedValue);
+                            } else {
+                              field.onChange(value);
+                            }
                           }}
                           onBlur={field.onBlur}
                           name={field.name}
