@@ -148,6 +148,8 @@ DATABASE_URL=postgresql://user:pass@host:port/database
 - July 07, 2025. Added file upload functionality to main password creation form for automatic data import
 - July 07, 2025. Implemented smart service name matching for uploaded files
 - July 07, 2025. Migration from Replit Agent to Replit environment completed with backup/restore feature
+- July 07, 2025. Enhanced file naming to use username from first entry plus creation date format
+- July 07, 2025. Added domain-specific username formatting (crm\ prefix for ad\терминал, @freshauto.ru suffix for crm)
 
 ## User Preferences
 

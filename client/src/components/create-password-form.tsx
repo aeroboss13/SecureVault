@@ -439,6 +439,24 @@ export default function CreatePasswordForm() {
                                 form.setValue(`services.${index}.serviceUrl`, service.url || "");
                               }
                               
+                              // Автоматическое форматирование имени пользователя
+                              const currentUsername = form.getValues(`services.${index}.username`) || "";
+                              if (currentUsername.trim()) {
+                                let formattedUsername = currentUsername;
+                                
+                                if (selectedValue === "ad\\терминал" && !currentUsername.startsWith("crm\\")) {
+                                  // Убираем существующий префикс если есть
+                                  const cleanUsername = currentUsername.replace(/^crm\\/, "");
+                                  formattedUsername = `crm\\${cleanUsername}`;
+                                } else if (selectedValue === "crm" && !currentUsername.includes("@")) {
+                                  // Убираем существующий суффикс если есть
+                                  const cleanUsername = currentUsername.replace(/@.*$/, "");
+                                  formattedUsername = `${cleanUsername}@freshauto.ru`;
+                                }
+                                
+                                form.setValue(`services.${index}.username`, formattedUsername);
+                              }
+                              
                               // Если выбрана почта, генерируем специальный пароль
                               if (service?.name === "Почта") {
                                 const specialPassword = generateSpecialFormatPassword();
@@ -499,7 +517,26 @@ export default function CreatePasswordForm() {
                     <FormItem className="sm:col-span-3">
                       <FormLabel>Имя пользователя</FormLabel>
                       <FormControl>
-                        <Input placeholder="username@example.com" {...field} />
+                        <Input 
+                          placeholder="ivan.petrov" 
+                          value={field.value || ''} 
+                          onChange={(e) => {
+                            let newValue = e.target.value;
+                            const selectedService = selectedServices[index];
+                            
+                            // Применяем форматирование в зависимости от выбранного сервиса
+                            if (selectedService === "ad\\терминал" && newValue && !newValue.startsWith("crm\\")) {
+                              newValue = `crm\\${newValue}`;
+                            } else if (selectedService === "crm" && newValue && !newValue.includes("@")) {
+                              newValue = `${newValue}@freshauto.ru`;
+                            }
+                            
+                            field.onChange(newValue);
+                          }}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
