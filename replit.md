@@ -142,6 +142,12 @@ DATABASE_URL=postgresql://user:pass@host:port/database
   - Added multer for file handling with 5MB limit
   - Integrated backup page into navigation and routing
   - Supports JSON export/import of password data
+- July 07, 2025: Production deployment preparation
+  - Changed default port from 5000 to 3000
+  - Created comprehensive deployment guide for Ubuntu servers
+  - Added PM2 configuration for process management
+  - Prepared environment configuration examples
+  - Added nginx configuration for reverse proxy and SSL
 
 ## Changelog
 - July 07, 2025. Initial setup
