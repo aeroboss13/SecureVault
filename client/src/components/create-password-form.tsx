@@ -520,27 +520,26 @@ export default function CreatePasswordForm() {
                           placeholder="ivan.petrov" 
                           value={field.value || ''} 
                           onChange={(e) => {
+                            // Просто обновляем значение без форматирования
+                            field.onChange(e.target.value);
+                          }}
+                          onBlur={(e) => {
                             const value = e.target.value;
                             const selectedService = selectedServices[index];
                             
-                            console.log('Username onChange:', { value, selectedService, index });
+                            console.log('Username onBlur:', { value, selectedService, index });
                             
-                            // Сначала обновляем поле
-                            field.onChange(value);
-                            
-                            // Затем применяем форматирование с задержкой
-                            setTimeout(() => {
-                              if (selectedService && value.trim()) {
-                                const formattedValue = formatUsername(value, selectedService);
-                                // Для CRM всегда применяем форматирование
-                                if (selectedService === "CRM" || formattedValue !== value) {
-                                  console.log('Applying formatting:', formattedValue);
-                                  field.onChange(formattedValue);
-                                }
+                            // Применяем форматирование при потере фокуса
+                            if (selectedService && value.trim()) {
+                              const formattedValue = formatUsername(value, selectedService);
+                              if (formattedValue !== value) {
+                                console.log('Applying formatting on blur:', formattedValue);
+                                field.onChange(formattedValue);
                               }
-                            }, 100);
+                            }
+                            
+                            field.onBlur();
                           }}
-                          onBlur={field.onBlur}
                           name={field.name}
                           ref={field.ref}
                         />
