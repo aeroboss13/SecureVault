@@ -11,6 +11,7 @@ export const predefinedServices: Service[] = [
   { name: "Я.Трекер", url: "https://tracker.yandex.ru" },
   { name: "Тезис", url: "http://tezis.freshauto2.ru/app/#!" },
   { name: "AD/терминал", url: null },
+  { name: "Клик", url: "https://qlik.freshauto2.ru/" },
   { name: "ТП - Центр поддержки", url: "https://tracker.freshauto.ru/servicedesk/customer/portals" },
   { name: "Другое", url: null }
 ];

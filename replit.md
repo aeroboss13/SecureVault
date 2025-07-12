@@ -151,6 +151,10 @@ DATABASE_URL=postgresql://user:pass@host:port/database
   - Implemented special format password generation for all services (3 lowercase + 4 digits + 3 uppercase + symbol)
   - Auto-generates special format passwords when selecting any predefined service
   - Updated password generation interface to show format specification
+- July 12, 2025: Added new service "Клик"
+  - Added Клик service with URL https://qlik.freshauto2.ru/
+  - Applied crm\ prefix username formatting similar to AD/терминал
+  - Updated username formatter to handle Клик service with domain prefix logic
 - July 07, 2025: Added backup/restore functionality
   - Created backup/restore API endpoints with file upload support
   - Implemented BackupRestore component for frontend interface

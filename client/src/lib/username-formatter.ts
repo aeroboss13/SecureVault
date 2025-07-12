@@ -6,13 +6,13 @@ export function formatUsername(username: string, serviceName: string): string {
   
   const cleanUsername = username.trim();
   
-  if (serviceName === "AD/терминал") {
+  if (serviceName === "AD/терминал" || serviceName === "Клик") {
     // Добавляем префикс crm\ если его нет
     if (!cleanUsername.startsWith("crm\\")) {
       // Убираем существующие префиксы
       const withoutPrefix = cleanUsername.replace(/^(crm\\|ad\\)/, "");
       const result = `crm\\${withoutPrefix}`;
-      console.log('Formatted for AD/терминал:', result);
+      console.log(`Formatted for ${serviceName}:`, result);
       return result;
     }
     return cleanUsername;
