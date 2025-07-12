@@ -456,8 +456,8 @@ export default function CreatePasswordForm() {
                                 form.setValue(`services.${index}.username`, formattedUsername);
                               }
                               
-                              // Если выбрана почта, генерируем специальный пароль
-                              if (service?.name === "Почта") {
+                              // Генерируем специальный пароль для всех сервисов
+                              if (service) {
                                 const specialPassword = generateSpecialFormatPassword();
                                 form.setValue(`services.${index}.password`, specialPassword);
                               }
@@ -587,24 +587,7 @@ export default function CreatePasswordForm() {
                     Генератор паролей
                   </FormLabel>
                   
-                  {index === 0 && (
-                    <div className="mt-2 mb-3">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="flex items-center text-sm"
-                        onClick={() => {
-                          const specialPassword = generateSpecialFormatPassword();
-                          handlePasswordGeneration(specialPassword, 0);
-                        }}
-                      >
-                        <Shield className="h-4 w-4 mr-2 text-primary-600" />
-                        Сгенерировать специальный пароль (3 строчные + 4 цифры + 3 прописные + спецсимвол)
-                      </Button>
-                    </div>
-                  )}
-                  
-                  <div className="mt-1">
+                  <div className="mt-2">
                     <PasswordGeneratorForm onGenerate={(password) => handlePasswordGeneration(password, index)} />
                   </div>
                 </div>

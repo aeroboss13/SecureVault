@@ -126,13 +126,7 @@ export const createPasswordSchema = z.object({
   comment: z.string().optional()
 });
 
-export const passwordGeneratorSchema = z.object({
-  length: z.number().min(8).max(32),
-  uppercase: z.boolean(),
-  lowercase: z.boolean(),
-  numbers: z.boolean(),
-  symbols: z.boolean(),
-});
+// Password generator schema removed - using only special format now
 
 export const backupDataSchema = z.object({
   version: z.string(),
@@ -148,5 +142,5 @@ export const backupDataSchema = z.object({
 export type LoginForm = z.infer<typeof loginSchema>;
 export type ServiceData = z.infer<typeof serviceSchema>;
 export type CreatePasswordForm = z.infer<typeof createPasswordSchema>;
-export type PasswordGeneratorOptions = z.infer<typeof passwordGeneratorSchema>;
+// PasswordGeneratorOptions type removed - using only special format now
 export type BackupData = z.infer<typeof backupDataSchema>;

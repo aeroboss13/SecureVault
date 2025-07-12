@@ -39,8 +39,8 @@ Freshpass is a secure password storage and sharing system that allows administra
 ### Password Management
 - **Storage**: Encrypted password entries with service metadata
 - **Organization**: Multiple services per admin with categorization
-- **Password Generation**: Customizable password generator with strength validation
-- **Special Format**: Support for specific password formats (e.g., 3 lowercase + 4 digits + 3 uppercase + symbol)
+- **Password Generation**: Special format password generator (3 lowercase + 4 digits + 3 uppercase + symbol)
+- **Auto-generation**: Automatic password generation when selecting any service
 
 ### Sharing System
 - **One-Time Links**: Secure token-based sharing with expiration
@@ -146,6 +146,11 @@ DATABASE_URL=postgresql://user:pass@host:port/database
   - Updated expiring shares count to handle both phases appropriately
   - Added live countdown timers to activity history showing remaining time
   - Enhanced history table to display timer type (2 weeks initial vs 1 hour after viewing)
+- July 12, 2025: Simplified password generation system
+  - Removed customizable password generator options
+  - Implemented special format password generation for all services (3 lowercase + 4 digits + 3 uppercase + symbol)
+  - Auto-generates special format passwords when selecting any predefined service
+  - Updated password generation interface to show format specification
 - July 07, 2025: Added backup/restore functionality
   - Created backup/restore API endpoints with file upload support
   - Implemented BackupRestore component for frontend interface
