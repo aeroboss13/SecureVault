@@ -96,19 +96,19 @@ The application supports two storage modes:
 
 1. Create a new share with the "Share Password" function
 2. Select the services you want to share
-3. Specify the recipient's email (links expire in 2 weeks automatically)
+3. Specify the recipient's email (links are accessible for 2 weeks, then active for 1 hour after viewing)
 4. Copy the generated link to share with the recipient
 
 ### Viewing Shared Passwords
 
-1. Recipients can access the shared passwords via the provided link
-2. The link remains valid for 2 weeks from creation
+1. Recipients can access the shared passwords via the provided link within 2 weeks of creation
+2. After first viewing, the link remains active for 1 hour, then expires
 3. After viewing, recipients can mark the password as "Confirmed" which deactivates the link
 
 ## Security Features
 
 - Passwords are securely stored in the database
-- One-time links with 2-week expiration time
+- Links accessible for 2 weeks, then active for 1 hour after viewing
 - Links become inactive after viewing or after expiry
 - Comprehensive activity logging for audit purposes
 

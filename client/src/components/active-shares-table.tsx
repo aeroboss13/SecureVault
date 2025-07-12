@@ -128,11 +128,17 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
         </thead>
         <tbody className="bg-white divide-y divide-neutral-200">
           {activeShares.map(({ share, entry }) => {
-            // Show timer if link has expiration (2 weeks from creation)
+            // Show timer if link has expiration
             const hasExpiration = share.expiresAt;
+            const isViewed = share.viewed;
             const expiryTimeText = hasExpiration ? formatExpiryTime(new Date(share.expiresAt)) : "";
             const expiryPercentage = hasExpiration ? getExpiryPercentage(new Date(share.expiresAt)) : 0;
-            const isExpiringSoon = hasExpiration && expiryPercentage <= 20; // Красный цвет когда остается меньше 20% времени (меньше 3 дней)
+            // Different warning logic for viewed vs unviewed links
+            const isExpiringSoon = hasExpiration && (
+              isViewed 
+                ? expiryPercentage <= 50  // For 1-hour timer, warn when 30min left
+                : expiryPercentage <= 10  // For 2-week timer, warn when ~1 day left
+            );
             const timeRemaining = hasExpiration ? getTimeRemaining(share.expiresAt) : "";
             const expiresInClass = isExpiringSoon ? "text-red-600 font-medium" : "text-green-600 font-medium";
             
@@ -168,7 +174,9 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                     {share.viewedAt ? formatDateTime(new Date(share.viewedAt)) : "Not viewed yet"}
                   </div>
                   <div className="text-xs text-green-600 mt-1">
-                    Valid for 2 weeks from creation
+                    {share.viewed 
+                      ? "Active for 1 hour after viewing" 
+                      : "Valid for 2 weeks from creation"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -186,7 +194,7 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                     </div>
                   ) : (
                     <div className="text-sm text-neutral-500">
-                      Expired
+                      {share.viewed ? "Expired after viewing" : "Initial access period expired"}
                     </div>
                   )}
                   {hasExpiration && (

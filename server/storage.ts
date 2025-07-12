@@ -302,7 +302,6 @@ export class MemStorage implements IStorage {
   
   async getExpiringSharesCount(adminId: number): Promise<number> {
     const now = new Date();
-    const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 часа
     
     return Array.from(this.passwordShares.values()).filter(
       (share) => 
@@ -310,7 +309,12 @@ export class MemStorage implements IStorage {
         share.active === true && 
         share.expiresAt &&
         share.expiresAt > now && 
-        share.expiresAt < twentyFourHoursFromNow
+        (
+          // For viewed links: expiring within next 30 minutes
+          (share.viewed && share.expiresAt < new Date(now.getTime() + 30 * 60 * 1000)) ||
+          // For unviewed links: expiring within next 24 hours  
+          (!share.viewed && share.expiresAt < new Date(now.getTime() + 24 * 60 * 60 * 1000))
+        )
     ).length;
   }
   

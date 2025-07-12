@@ -136,12 +136,14 @@ DATABASE_URL=postgresql://user:pass@host:port/database
 - CORS policy configuration
 
 ## Recent Changes
-- July 12, 2025: Changed password share expiration from 1 hour to 2 weeks
-  - Modified share creation logic to set expiration to 2 weeks from generation
-  - Updated share access logic to check expiration from creation time, not view time
-  - Changed expiring shares count to identify shares expiring within 24 hours
-  - Updated frontend display logic to show 2-week countdown from creation
-  - Updated documentation to reflect new 2-week expiration policy
+- July 12, 2025: Implemented two-phase expiration system for shared links
+  - Links are accessible for 2 weeks from creation (initial access period)
+  - After first viewing, links remain active for 1 hour, then expire
+  - If links are not accessed within 2 weeks, they become permanently unavailable
+  - Updated share creation logic to set 2-week initial expiration
+  - Modified view logic to set 1-hour timer after first access
+  - Updated frontend to show different countdown logic for viewed vs unviewed links
+  - Updated expiring shares count to handle both phases appropriately
 - July 07, 2025: Added backup/restore functionality
   - Created backup/restore API endpoints with file upload support
   - Implemented BackupRestore component for frontend interface

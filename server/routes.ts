@@ -96,9 +96,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Generate unique token
         const shareToken = nanoid(24);
         
-        // Set expiration to 2 weeks from now
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 14); // 2 недели
+        // Set initial access expiration to 2 weeks from now (before first view)
+        const initialExpiresAt = new Date();
+        initialExpiresAt.setDate(initialExpiresAt.getDate() + 14); // 2 недели для доступа к ссылке
         
         // Use the first entry as the main entry for the share
         const mainEntry = createdEntries[0];
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           adminId: req.user.id,
           recipientEmail,
           shareToken,
-          expiresAt,
+          expiresAt: initialExpiresAt,
           comment
         });
         
@@ -127,7 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           serviceName: mainEntry.serviceName,
           recipientEmail: mainEntry.username,
           status: "Active",
-          expiresAt
+          expiresAt: initialExpiresAt
         });
       }
       
@@ -152,16 +152,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate unique token
       const shareToken = nanoid(24);
       
-      // Set expiration to 2 weeks from now
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 14); // 2 недели
+      // Set initial access expiration to 2 weeks from now (before first view)
+      const initialExpiresAt = new Date();
+      initialExpiresAt.setDate(initialExpiresAt.getDate() + 14); // 2 недели для доступа к ссылке
       
       const share = await storage.createPasswordShare({
         entryId, // Используем entryId как основной (первый) пароль для ссылки
         adminId: req.user.id,
         recipientEmail,
         shareToken,
-        expiresAt
+        expiresAt: initialExpiresAt
       });
       
       // Создаем связь между ссылкой и паролем
@@ -177,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         serviceName: entry.serviceName,
         recipientEmail: entry.username, // Используем имя пользователя из записи пароля
         status: "Active",
-        expiresAt
+        expiresAt: initialExpiresAt
       });
       
       res.status(201).json(share);
@@ -278,10 +278,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(410).json({ error: "This link has been revoked" });
       }
       
-      // Check if expired
+      // Check if expired - different logic for viewed vs unviewed links
       const now = new Date();
       if (share.expiresAt && now > share.expiresAt) {
-        return res.status(410).json({ error: "This link has expired" });
+        if (share.viewed) {
+          // Link was viewed and 1-hour timer expired
+          return res.status(410).json({ error: "This link has expired after viewing" });
+        } else {
+          // 2-week initial access period expired without viewing
+          return res.status(410).json({ error: "This link has expired - initial access period (2 weeks) has ended" });
+        }
       }
       
       // Проверка на одноразовую ссылку
@@ -301,15 +307,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Отмечаем, что ссылка была открыта один раз
       await storage.markShareAsOpened(share.id);
       
-      // If not viewed yet, mark as viewed (expiration already set to 2 weeks from creation)
+      // If not viewed yet, mark as viewed and set 1-hour expiration from now
       if (!share.viewed) {
         // Get current time as viewed time
         const viewedAt = new Date();
         
-        // Mark as viewed (don't update expiration - it's already set to 2 weeks from creation)
-        await storage.markShareAsViewed(share.id);
+        // Calculate new expiry time (60 minutes from now)
+        const hourExpiresAt = new Date(viewedAt);
+        hourExpiresAt.setMinutes(hourExpiresAt.getMinutes() + 60);
         
-        // Log activity with viewed time
+        // Mark as viewed and update expiration to 1 hour from now
+        await storage.markShareAsViewed(share.id);
+        await storage.updateShareExpiration(share.id, hourExpiresAt);
+        
+        // Log activity with viewed and new expiry times
         await storage.createActivityLog({
           adminId: share.adminId,
           action: "Password Viewed",
@@ -317,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           recipientEmail: mainEntry.username, 
           status: "Viewed",
           viewedAt,
-          expiresAt: share.expiresAt
+          expiresAt: hourExpiresAt
         });
       }
       
