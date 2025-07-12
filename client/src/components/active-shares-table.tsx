@@ -128,13 +128,13 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
         </thead>
         <tbody className="bg-white divide-y divide-neutral-200">
           {activeShares.map(({ share, entry }) => {
-            // Only show timer if link has been viewed (opened) and has expiration
-            const hasExpiration = share.expiresAt && share.viewed;
+            // Show timer if link has expiration (2 weeks from creation)
+            const hasExpiration = share.expiresAt;
             const expiryTimeText = hasExpiration ? formatExpiryTime(new Date(share.expiresAt)) : "";
             const expiryPercentage = hasExpiration ? getExpiryPercentage(new Date(share.expiresAt)) : 0;
-            const isExpiringWithinHour = hasExpiration && expiryPercentage <= 50;
+            const isExpiringSoon = hasExpiration && expiryPercentage <= 20; // Красный цвет когда остается меньше 20% времени (меньше 3 дней)
             const timeRemaining = hasExpiration ? getTimeRemaining(share.expiresAt) : "";
-            const expiresInClass = isExpiringWithinHour ? "text-red-600 font-medium" : "text-green-600 font-medium";
+            const expiresInClass = isExpiringSoon ? "text-red-600 font-medium" : "text-green-600 font-medium";
             
             return (
               <tr key={share.id}>
@@ -167,18 +167,16 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                   <div className="text-sm text-neutral-500">
                     {share.viewedAt ? formatDateTime(new Date(share.viewedAt)) : "Not viewed yet"}
                   </div>
-                  {share.viewedAt && (
-                    <div className="text-xs text-green-600 mt-1">
-                      Active for 60 min after view
-                    </div>
-                  )}
+                  <div className="text-xs text-green-600 mt-1">
+                    Valid for 2 weeks from creation
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {hasExpiration ? (
                     <div className="flex items-center">
                       <svg className={cn(
                         "h-5 w-5 mr-1.5",
-                        isExpiringWithinHour ? "text-red-500" : "text-green-500"
+                        isExpiringSoon ? "text-red-500" : "text-green-500"
                       )} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -188,14 +186,14 @@ export default function ActiveSharesTable({ shares = [] }: ActiveSharesTableProp
                     </div>
                   ) : (
                     <div className="text-sm text-neutral-500">
-                      {share.viewed ? "Expired" : "Timer starts when opened"}
+                      Expired
                     </div>
                   )}
                   {hasExpiration && (
                     <div className="w-full h-1.5 mt-1 bg-neutral-200 rounded-full overflow-hidden">
                       <div className={cn(
                         "timer-progress h-full",
-                        isExpiringWithinHour ? "bg-red-500" : "bg-green-500"
+                        isExpiringSoon ? "bg-red-500" : "bg-green-500"
                       )} style={{ width: `${expiryPercentage}%` }}></div>
                     </div>
                   )}
