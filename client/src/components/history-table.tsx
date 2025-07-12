@@ -1,11 +1,13 @@
 import { formatDateTime, getTimeRemaining } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
 import { 
   Calendar, 
   Eye, 
   Trash2, 
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Clock
 } from "lucide-react";
 
 interface ActivityLog {
@@ -25,6 +27,17 @@ interface HistoryTableProps {
 }
 
 export default function HistoryTable({ logs = [] }: HistoryTableProps) {
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute to refresh expiry timers
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
+
   if (logs.length === 0) {
     return (
       <div className="text-center py-10 text-neutral-500">
@@ -200,11 +213,25 @@ export default function HistoryTable({ logs = [] }: HistoryTableProps) {
                   {log.viewedAt ? formatDateTime(new Date(log.viewedAt)) : "-"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500">
-                  {showExpiry && log.expiresAt ? 
-                    <span className={new Date(log.expiresAt) > new Date() ? 
-                      "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                      {getTimeRemaining(log.expiresAt)}
-                    </span> : 
+                  {(log.action === "Created Share" || log.action === "Password Viewed") && log.expiresAt ? 
+                    <div className="flex flex-col">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1.5 text-neutral-400" />
+                        <span className={new Date(log.expiresAt) > currentTime ? 
+                          "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                          {new Date(log.expiresAt) > currentTime ? 
+                            getTimeRemaining(log.expiresAt) : 
+                            "Истекла"
+                          }
+                        </span>
+                      </div>
+                      <div className="text-xs text-neutral-400 mt-1">
+                        {log.action === "Created Share" ? 
+                          (log.viewedAt ? "После просмотра (1 час)" : "До первого доступа (2 недели)") :
+                          "После просмотра (1 час)"
+                        }
+                      </div>
+                    </div> : 
                     "-"
                   }
                 </td>

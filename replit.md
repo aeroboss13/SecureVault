@@ -144,6 +144,8 @@ DATABASE_URL=postgresql://user:pass@host:port/database
   - Modified view logic to set 1-hour timer after first access
   - Updated frontend to show different countdown logic for viewed vs unviewed links
   - Updated expiring shares count to handle both phases appropriately
+  - Added live countdown timers to activity history showing remaining time
+  - Enhanced history table to display timer type (2 weeks initial vs 1 hour after viewing)
 - July 07, 2025: Added backup/restore functionality
   - Created backup/restore API endpoints with file upload support
   - Implemented BackupRestore component for frontend interface
